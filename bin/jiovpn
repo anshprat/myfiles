@@ -1,0 +1,18 @@
+sudo openconnect --config=/home/anshup/bin/jiovpn.conf jiovpn.hackalyst.info
+sleep 5
+route -n|grep ^0|grep wlp|awk '{print $2}'|grep ^10.0.0
+office=$?
+#echo $office
+if [ $office -eq 1 ]
+then
+gw=100.112.192.1
+else
+gw=10.0.0.1
+fi
+#sleep 5
+vpn_device=`ifconfig |grep -E 'tun|vpn'|cut -f 1 -d ':'`
+sudo route del -net 0.0.0.0 netmask 0.0.0.0 dev $vpn_device
+sudo route add default gw $gw
+sudo route add -net 10.135.0.0/16 dev $vpn_device
+sudo route add -net 10.204.0.0/16 dev $vpn_device
+keepalivevpn
