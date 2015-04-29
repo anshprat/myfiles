@@ -27,4 +27,5 @@ _host_list()
 }
 complete -F _host_list ssh
 complete -F _host_list host
+complete -F _host_list ping
 
