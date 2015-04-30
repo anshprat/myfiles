@@ -1,0 +1,15 @@
+#!/bin/bash
+#0 * * * * /home/anshup/bin/downloads_organizer
+
+cd $HOME/Downloads
+
+if [ ! -d 'all' ]
+then mkdir all
+fi
+
+if [ ! -d `date +%F` ]
+then mv * all 
+mkdir `date +%F`
+rm all/dailydownload
+ln -s `date +%F` dailydownload
+fi
