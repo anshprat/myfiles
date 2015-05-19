@@ -4,6 +4,7 @@ do
 vpn_device=`ifconfig |grep -E 'tun|vpn'|cut -f 1 -d ':'`
 if [ -z $vpn_device ]
 then pkill keepalivevpn
+killvpn
 fi
 curl -s 10.135.96.13 > /dev/null
 sleep 300

@@ -1,0 +1,1 @@
+grep -vE 'ECD|^#|SSLC|Insecu|Permission' $1 |grep '[a-z]'|less

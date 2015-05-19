@@ -1,1 +1,2 @@
 sudo pkill openconnect
+pkill keepalivevpn

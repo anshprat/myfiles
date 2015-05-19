@@ -1,4 +1,4 @@
-gw_ip=`route -n|grep ^0|grep wlp|awk '{print $2}'`
+gw_ip=`route -n|grep ^0|grep wl|awk '{print $2}'`
 sudo openconnect --config=/home/anshup/bin/jiovpn.conf jiovpn.hackalyst.info
 sleep 5
 vpn_device=`ifconfig |grep -E 'tun|vpn'|cut -f 1 -d ':'`

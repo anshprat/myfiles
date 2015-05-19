@@ -8,7 +8,7 @@ then mkdir all
 fi
 
 if [ ! -d `date +%F` ]
-then mv * all 
+then mv * all  
 mkdir `date +%F`
 rm all/dailydownload
 ln -s `date +%F` dailydownload

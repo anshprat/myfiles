@@ -1,0 +1,2 @@
+ git status|grep modified|awk '{print $2}'|xargs git add
+

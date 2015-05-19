@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ ! -z $1 ]
+then
+cd $HOME/git/ril/puppet-rjil/manifests
+fi
+
+for i in `ls`
+do echo $i 
+puppet-lint $i |grep ERR
+done

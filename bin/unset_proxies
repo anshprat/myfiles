@@ -1,0 +1,2 @@
+bash -c 'unset http_proxy'
+bash -c 'unset https_proxy'
