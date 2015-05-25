@@ -1,1 +1,8 @@
-grep -vE 'ECD|^#|SSLC|Insecu|Permission' $1 |grep '[a-z]'|less
+cd ~/tmp
+job=$1
+if [ ! -f consoleText.${job} ]
+then
+wget http://jiocloud.rustedhalo.com:8080/job/puppet-rjil-gate/${job}/consoleText -O consoleText.${job}
+fi
+
+grep -vE 'ECD|^#|SSLC|Insecu|Permission' consoleText.${job} |grep '[a-z]'|less
