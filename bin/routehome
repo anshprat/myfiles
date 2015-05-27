@@ -1,4 +1,0 @@
-sudo route del -net 0.0.0.0 netmask 0.0.0.0 dev tun0
-sudo route add default gw 10.0.0.1
-sudo route add -net 10.135.0.0/16 dev tun0
-sudo route add -net 10.204.0.0/16 dev tun0 
