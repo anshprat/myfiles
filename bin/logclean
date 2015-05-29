@@ -5,4 +5,4 @@ then
 wget http://jiocloud.rustedhalo.com:8080/job/puppet-rjil-gate/${job}/consoleText -O consoleText.${job}
 fi
 
-grep -vE 'ECD|^#|SSLC|Insecu|Permission' consoleText.${job} |grep '[a-z]'|less
+grep -vE 'Seen|ECD|^#|SSLC|Insecu|Permission' consoleText.${job} |grep '[a-z]'|less
