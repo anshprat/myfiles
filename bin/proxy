@@ -1,0 +1,4 @@
+#!/bin/bash
+port=${1:-8080}
+ssh -fN -R ${port}:localhost:${port} bare.ril.corp.hackalyst.info
+ssh -D $port localhost

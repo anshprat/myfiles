@@ -1,0 +1,1 @@
+ps aux|grep ssh|grep -v sshd|grep -E "f|D"|awk '{print $2}'|xargs kill
