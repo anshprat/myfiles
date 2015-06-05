@@ -8,3 +8,4 @@ sudo route add -net 10.135.0.0/16 dev $vpn_device
 sudo route add -net 10.204.0.0/16 dev $vpn_device
 sudo route add -net 10.140.0.0/16 dev $vpn_device
 keepalivevpn
+sudo cp /etc/resolv.conf.vpn /etc/resolv.conf
