@@ -1,0 +1,2 @@
+grep -inr 49.40.64.$1 ~/.ssh/known_hosts |awk -F ':' '{print $1}'|xargs -I l sed -i ld ~/.ssh/known_hosts
+
