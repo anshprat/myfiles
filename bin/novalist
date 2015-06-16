@@ -1,0 +1,6 @@
+cd ~/tmp
+latest_file=novalist-latest
+rm $latest_file
+file=nl_`date +%F-%s`
+nova lits>$file
+ln -s $file $latest_file
