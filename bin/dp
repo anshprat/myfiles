@@ -1,2 +1,5 @@
-./deskproxy desk.ril.corp.hackalyst.info 8022
-./deskproxy desk.ril.corp.hackalyst.info 8082
+desk=desk.ril.corp.hackalyst.info
+./deskproxy $desk 8022
+./deskproxy $desk 8082
+ssh $desk "~/bin/dp"
+
