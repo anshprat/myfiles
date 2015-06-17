@@ -1,6 +1,7 @@
-cd ~/tmp
+cd /home/anshup/tmp
 latest_file=novalist-latest
 rm $latest_file
 file=nl_`date +%F-%s`
-nova lits>$file
+source /home/anshup/git/anshprat/myfiles/private_keys/jenkins_oc_rc
+nova list>$file
 ln -s $file $latest_file

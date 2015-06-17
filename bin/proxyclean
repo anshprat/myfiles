@@ -1,0 +1,9 @@
+#!/bin/bash
+
+bare="bare.ril.corp.hackalyst.info"
+desk="desk.ril.corp.hackalyst.info"
+
+ssh $bare "ssh $desk 'pkill ssh'"
+ssh $bare "pkill ssh"
+pkill ssh
+

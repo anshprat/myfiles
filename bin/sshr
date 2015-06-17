@@ -1,1 +1,7 @@
-ssh -A 49.40.64.$1
+opt='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+if [ -z $2 ]
+then
+	ssh -A $opt 49.40.64.$1
+else
+	ssh -A $opt ubuntu@49.40.64.$1
+fi
