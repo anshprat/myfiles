@@ -1,5 +1,5 @@
 cd /home/anshup/tmp
-latest_file=novalist-latest
+latest_file=latest-novalist
 rm $latest_file
 file=nl_`date +%F-%s`
 source /home/anshup/git/anshprat/myfiles/private_keys/jenkins_oc_rc

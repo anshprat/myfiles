@@ -25,3 +25,4 @@ alias devops="source $KEYS/devops_rc"
 alias oss="source $KEYS/oss_rc"
 alias uc="source $KEYS/undercloud-admin_rc"
 alias tmp="cd $HOME/tmp"
+export PYTHONPATH=$PYTHONPATH:/home/anshup/git/ril/python-jiocloud
