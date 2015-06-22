@@ -3,5 +3,6 @@ cd $HOME/bin
 desk=bare.ril.corp.hackalyst.info
 deskproxy $desk 8022
 deskproxy $desk 8082
+deskproxy $desk 8080
 ssh $desk "~/bin/dp &" &
 

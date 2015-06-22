@@ -1,3 +1,4 @@
+set -xe
 reserved=`curl -s "https://docs.google.com/spreadsheets/d/1V75IDtU8GWH2sX5G0dKQDH6K2RX5RZaoJQX0MoIEW4g/export?gid=0&format=csv"|cut -f 1 -d ','|grep ^[1-9]|paste -sd'|'`
 
 for i in `nova list|grep testjenkins-puppet-rjil-gate |awk '{print $4}'|cut -f 5 -d '-'|sort|uniq|grep -vE "$reserved"`
