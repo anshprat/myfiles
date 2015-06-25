@@ -1,9 +1,20 @@
-set -xe
 reserved=`curl -s "https://docs.google.com/spreadsheets/d/1V75IDtU8GWH2sX5G0dKQDH6K2RX5RZaoJQX0MoIEW4g/export?gid=0&format=csv"|cut -f 1 -d ','|grep ^[1-9]|paste -sd'|'`
 
 for i in `nova list|grep testjenkins-puppet-rjil-gate |awk '{print $4}'|cut -f 5 -d '-'|sort|uniq|grep -vE "$reserved"`
 do
-echo "Build $i"
-sleep 5
-python -m jiocloud.apply_resources delete testjenkins-puppet-rjil-gate-${i}
+echo "Checking build $i"
+result=`curl -s http://jiocloud.rustedhalo.com:8080/job/puppet-rjil-gate/${i}/api/json |jshon -e result`
+if [ $result != "null" ]
+then
+	echo "Build $i status: $result"
+	echo "Deleting build $i in"
+	for t in `seq 5 -1 1`
+	do
+		echo -ne "\b${t}"
+		sleep 1
+	done
+	python -m jiocloud.apply_resources delete testjenkins-puppet-rjil-gate-${i}
+else
+	echo "Build $i is still building, not deleting"
+fi
 done
