@@ -5,4 +5,4 @@ file=nl_`date +%F-%s`
 source /home/anshup/git/anshprat/myfiles/private_keys/jenkins_oc_rc
 nova list>$file
 ln -s $file $latest_file
-less $latest_file
+#less $latest_file

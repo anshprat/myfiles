@@ -1,5 +1,5 @@
 #!/bin/bash
-
+mypid=`ps aux|grep '/usr/bin/python /usr/bin/cloud-init modules'|grep -v grep|awk '{print $2}'`
 if [ -z $mypid ]
 then 
 mypid=`ps aux|grep '/bin/sh -c run-one /usr/local/bin/maybe-upgrade.sh 2>&1 | logger -t maybe-upgrade'|grep -v grep|awk '{print $2}'`
