@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ -z $mypid ]
+then 
+mypid=`ps aux|grep '/bin/sh -c run-one /usr/local/bin/maybe-upgrade.sh 2>&1 | logger -t maybe-upgrade'|grep -v grep|awk '{print $2}'`
+fi
+if [ -z $mypid ]
+then
+echo "`hostname` is not processing puppet-rjil presently"
+exit 0
+fi
+ps f -p $(pstree -p $mypid | sed 's/(/\n(/g' | grep '(' | sed 's/(\(.*\)).*/\1/' | tr "\n" " ")
+
