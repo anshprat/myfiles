@@ -1,4 +1,5 @@
 #!/bin/bash
+
 mypid=`ps aux|grep '/usr/bin/python /usr/bin/cloud-init modules'|grep -v grep|awk '{print $2}'`
 if [ -z $mypid ]
 then 
@@ -9,5 +10,6 @@ then
 echo "`hostname` is not processing puppet-rjil presently"
 exit 0
 fi
+hostname
 ps f -p $(pstree -p $mypid | sed 's/(/\n(/g' | grep '(' | sed 's/(\(.*\)).*/\1/' | tr "\n" " ")
 

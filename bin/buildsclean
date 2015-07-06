@@ -1,20 +1,72 @@
+#set -xe
 reserved=`curl -s "https://docs.google.com/spreadsheets/d/1V75IDtU8GWH2sX5G0dKQDH6K2RX5RZaoJQX0MoIEW4g/export?gid=0&format=csv"|cut -f 1 -d ','|grep ^[1-9]|paste -sd'|'`
+
+function check_build_status {
+    build_number=$1
+    if [[ $build_number == *"pkg"* ]]
+    then
+        # Its a pkg-test build
+        job_name="pkg_test_build"
+        build_number=`echo $1|cut -b 10-`
+    elif [[ $build_number == *"test"* ]]
+    then
+        #Its an AT env
+        job_name=pipeline-at-deploy
+        build_number=`echo $1|cut -b 5-`
+    else
+        # Its a gate
+        job_name='puppet-rjil-gate'
+    fi
+    echo "Checking build $i"
+    build_running_status=`curl -s http://jiocloud.rustedhalo.com:8080/job/${job_name}/${build_number}/api/json |jshon -e result`
+    delete_build $1 $build_running_status
+}
+
+function delete_build {
+    build_number=$1
+    result=$2
+    if [ $result != "null" ]
+    then
+        echo "Build $build_number status: $result"
+        echo -n "Deleting build $build_number in  "
+        for t in `seq 5 -1 0`
+        do
+            echo -ne "\b${t}"
+            sleep 1
+        done
+        echo
+        if [[ $build_number == *"pkg"* ]]
+        then
+            # Its a pkg-test build
+            resource=" testjenkins-puppet_rjil_${build_number}"
+        elif [[ $build_number == *"test"* ]]
+        then
+            #Its an AT env
+            resource=" ${build_number}"
+        else
+            # Its a gate
+            resource=" testjenkins-puppet-rjil-gate-${build_number}"
+        fi
+        python -m jiocloud.apply_resources delete $resource
+    else
+        echo "Build $i is still building, not deleting"
+    fi
+
+}
 
 for i in `nova list|grep testjenkins-puppet-rjil-gate |awk '{print $4}'|cut -f 5 -d '-'|sort|uniq|grep -vE "$reserved"`
 do
-echo "Checking build $i"
-result=`curl -s http://jiocloud.rustedhalo.com:8080/job/puppet-rjil-gate/${i}/api/json |jshon -e result`
-if [ $result != "null" ]
-then
-	echo "Build $i status: $result"
-	echo "Deleting build $i in"
-	for t in `seq 5 -1 1`
-	do
-		echo -ne "\b${t}"
-		sleep 1
-	done
-	python -m jiocloud.apply_resources delete testjenkins-puppet-rjil-gate-${i}
-else
-	echo "Build $i is still building, not deleting"
-fi
+check_build_status $i
+done
+
+echo "Cleaning up AT environments"
+for i in `nova list|grep _test |grep -v jenkins|awk '{print $4}'|cut -f 2 -d '_'|sort -u|grep [0-9]`
+do
+check_build_status $i
+done
+
+echo "Cleaning up pkg-test builds"
+for i in `nova list|grep pkg_test |awk '{print $4}'|cut -f 4- -d '_'|sort -u`
+do
+check_build_status $i
 done

@@ -1,0 +1,2 @@
+cd $HOME/tmp
+grep $1 latest-novalist |awk '{print $12}'|cut -f 2 -d '='|tr ',' ' '
