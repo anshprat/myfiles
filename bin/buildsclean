@@ -9,8 +9,9 @@
 ##
 function reserved_builds {
     gid=$1
+    sheetid="1V75IDtU8GWH2sX5G0dKQDH6K2RX5RZaoJQX0MoIEW4g"
     local  __resultvar=$2
-    url="https://docs.google.com/spreadsheets/d/1V75IDtU8GWH2sX5G0dKQDH6K2RX5RZaoJQX0MoIEW4g/export?gid=${gid}&format=csv"
+    url="https://docs.google.com/spreadsheets/d/${sheetid}/export?gid=${gid}&format=csv"
     local result=`curl -s $url|cut -f 1 -d ','|grep ^[0-9]|paste -sd'|'`
     eval $__resultvar="'$result'"
 }
@@ -32,7 +33,8 @@ function check_build_status {
         job_name='puppet-rjil-gate'
     fi
     echo "Checking build $i"
-    build_running_status=`curl -s http://jiocloud.rustedhalo.com:8080/job/${job_name}/${build_number}/api/json |jshon -e result`
+    build_url="http://jiocloud.rustedhalo.com:8080/job/${job_name}/${build_number}/api/json"
+    build_running_status=`curl -s ${build_url}|jshon -e result`
     delete_build $1 $build_running_status
 }
 
