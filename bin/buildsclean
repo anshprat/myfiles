@@ -16,6 +16,7 @@ function reserved_builds {
     eval $__resultvar="'$result'"
 }
 
+jenkins_server="http://jiocloud.rustedhalo.com:8080"
 function check_build_status {
     build_number=$1
     if [[ $build_number == *"pkg"* ]]
@@ -28,14 +29,27 @@ function check_build_status {
         #Its an AT env
         job_name=pipeline-at-deploy
         build_number=`echo $1|cut -b 5-`
+    elif [[ $build_number == *"cloud"* ]]
+    then
+        #Its an OC/UC env
+        job_name=puppet-rjil-gate-`echo $1|cut -f 1 -d '-'`
+        build_number=`echo $1|cut -f 2 -d '-'`
     else
         # Its a gate
         job_name='puppet-rjil-gate'
     fi
     echo "Checking build $i"
-    build_url="http://jiocloud.rustedhalo.com:8080/job/${job_name}/${build_number}/api/json"
+    build_url="$jenkins_server/job/${job_name}/${build_number}/api/json"
+    echo $build_url
     build_running_status=`curl -s ${build_url}|jshon -e result`
-    delete_build $1 $build_running_status
+    curl_rv=$?
+    if [ $curl_rv -eq 1 ]
+    then
+        # we get exit 1 if build history is delete (example in gate).
+        delete_build $1 "BUILD_INFO_DELETED"
+    else
+        delete_build $1 $build_running_status
+    fi
 }
 
 function delete_build {
@@ -54,11 +68,20 @@ function delete_build {
         if [[ $build_number == *"pkg"* ]]
         then
             # Its a pkg-test build
+	    # build_number is test_${build_num}"
             resource=" testjenkins-puppet_rjil_${build_number}"
         elif [[ $build_number == *"test"* ]]
         then
             #Its an AT env
             resource=" ${build_number}"
+        elif [[ $build_number == *"undercloud"* ]]
+        then
+            #Its an UC env
+            resource=`echo  ${build_number}|cut -f 2 -d '-'`
+            del_url="$jenkins_server/job/puppet-rjil-gate-undercloud-delete/buildWithParameters?token=4c8d10dff41e8c6c8096f41416705b50&jobid=${resource}&cause=buildcleanupscript"
+            #echo $del_url
+            curl "${del_url}"
+            return $?
         else
             # Its a gate
             resource=" testjenkins-puppet-rjil-gate-${build_number}"
@@ -70,9 +93,9 @@ function delete_build {
 
 }
 
-echo "Checking gate builds"
+echo "Checking gate/OC builds"
 reserved_builds 0 reserved
-for i in `nova list|grep testjenkins-puppet-rjil-gate |awk '{print $4}'|cut -f 5 -d '-'|sort|uniq|grep -vE "$reserved"`
+for i in `nova list|grep testjenkins-puppet-rjil-gate |awk '{print $4}'|cut -f 5- -d '-'|sort|uniq|grep -vE "$reserved"`
 do
 check_build_status $i
 done
