@@ -1,14 +1,23 @@
 set -xe
 
-BUILD_TAG=anshu-tenant-build-gate-1
-ghprbPullId=669
+BUILD_TAG=anshu-test-tenant-1
+#BUILD_TAG=external-at-2
+#ghprbPullId=725
+#export pull_request_id=$ghprbPullId
 export KEY_NAME=combo
 export env_file="/home/anshup/git/anshprat/myfiles/private_keys/anshu_rc"
 export ssh_user=ubuntu
-
 export dns_server=192.168.20.2
+#export dns_server=10.0.0.2
 export env_http_proxy=http://${dns_server}:3128/
 export env_https_proxy=http://${dns_server}:3128/
+export cloud_provider=anshu-gate
+
+
+#export override_repo="http://jiocloud.rustedhalo.com:8080/job/pkg_test_build/69/artifact/new_repo.tgz"
+#export layout=external
+
+######################## END OF MODIFICATIONS ################################
 
 export module_git_cache=http://jiocloud.rustedhalo.com:8080/job/puppet-jiocloud-cache/lastSuccessfulBuild/artifact/cache.tar.gz
 export git_protocol=https
@@ -25,6 +34,5 @@ export cloud_provider=jio
 
 # ensure that the correct pull request number and repo are set
 export puppet_modules_source_repo=https://github.com/jiocloud/puppet-rjil
-export pull_request_id=$ghprbPullId
 ./build_scripts/deploy.sh
 ./build_scripts/test.sh

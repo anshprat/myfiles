@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -xe
+# set -xe
 ##
 # function reserved_builds gid returnvar
 # The first arg is the sheet id to use. Can be found from the gid param of the
@@ -41,13 +41,14 @@ function check_build_status {
     echo "Checking build $i"
     build_url="$jenkins_server/job/${job_name}/${build_number}/api/json"
     echo $build_url
-    build_running_status=`curl -s ${build_url}|jshon -e result`
-    curl_rv=$?
-    if [ $curl_rv -eq 1 ]
+    res_404=`curl -sI ${build_url}|grep HTTP|grep 200`
+    res_rv=$?
+    if [ ${res_rv} -eq 1 ]
     then
-        # we get exit 1 if build history is delete (example in gate).
+        # we get exit 1 if build history is delete (example in AT).
         delete_build $1 "BUILD_INFO_DELETED"
     else
+        build_running_status=`curl -s ${build_url}|jshon -e result`
         delete_build $1 $build_running_status
     fi
 }
@@ -86,7 +87,7 @@ function delete_build {
             # Its a gate
             resource=" testjenkins-puppet-rjil-gate-${build_number}"
         fi
-        python -m jiocloud.apply_resources delete $resource
+        python -m jiocloud.apply_resources delete $resource || echo "[ERROR] Delete failed"
     else
         echo "Build $i is still building, not deleting"
     fi
@@ -95,14 +96,14 @@ function delete_build {
 
 echo "Checking gate/OC builds"
 reserved_builds 0 reserved
-for i in `nova list|grep testjenkins-puppet-rjil-gate |awk '{print $4}'|cut -f 5- -d '-'|sort|uniq|grep -vE "$reserved"`
+for i in `nova list|grep testjenkins-puppet-rjil-gate |awk '{print $4}'|cut -f 5- -d '-'|sort|uniq|grep -vE "$reserved" || true`
 do
 check_build_status $i
 done
 
 echo "Checking AT environments"
 reserved_builds 770431315 reserved
-for i in `nova list|grep _test |grep -v jenkins|awk '{print $4}'|cut -f 2 -d '_'|sort -u|grep [0-9]|grep -vE "$reserved"`
+for i in `nova list|grep _test |grep -v jenkins|awk '{print $4}'|cut -f 2 -d '_'|sort -u|grep [0-9]|grep -vE "$reserved|external"`
 do
 check_build_status $i
 done

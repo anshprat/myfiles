@@ -1,3 +1,4 @@
+killvpn
 gw_ip=`route -n|grep ^0|grep wl|awk '{print $2}'`
 sudo openconnect --config=/home/anshup/bin/jiovpn.conf jiovpn.hackalyst.info
 sleep 5

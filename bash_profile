@@ -27,4 +27,4 @@ alias uc="source $KEYS/undercloud-admin_rc"
 alias tmp="cd $HOME/tmp"
 alias nl="source $HOME/bin/novalist"
 export PYTHONPATH=$PYTHONPATH:/home/anshup/git/ril/python-jiocloud
-
+alias anshu='source /home/anshup/git/anshprat/myfiles/private_keys/anshu_rc'
