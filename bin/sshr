@@ -1,4 +1,4 @@
-opt='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+opt='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR'
 if [ $1 -eq 85 ]
 then ssh 49.40.64.$1
 else

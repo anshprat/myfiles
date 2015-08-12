@@ -102,7 +102,7 @@ check_build_status $i
 done
 
 echo "Checking AT environments"
-reserved_builds 770431315 reserved
+reserved_builds 748670303 reserved
 for i in `nova list|grep _test |grep -v jenkins|awk '{print $4}'|cut -f 2 -d '_'|sort -u|grep [0-9]|grep -vE "$reserved|external"`
 do
 check_build_status $i
