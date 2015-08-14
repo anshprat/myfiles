@@ -7,7 +7,7 @@ fi
 
 # User specific environment and startup programs
 
-PATH=$PATH:$HOME/.local/bin:$HOME/bin:./
+PATH=$PATH:$HOME/.local/bin:$HOME/bin:./:/home/anshup/git/anshprat/myfiles/private_keys
 
 export PATH
 export TERM=xterm
@@ -20,7 +20,7 @@ alias ssh='ssh -A'
 alias p8='ping 8.8.8.8'
 export KEYS=/home/anshup/git/anshprat/myfiles/private_keys
 alias admin="source $KEYS/admin_rc"
-alias jenkins="source $KEYS/jenkins_oc_rc"
+alias jenkins="source $KEYS/jio_gate"
 alias devops="source $KEYS/devops_rc"
 alias oss="source $KEYS/oss_rc"
 alias uc="source $KEYS/undercloud-admin_rc"
