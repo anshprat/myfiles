@@ -49,7 +49,40 @@ function check_build_status {
         delete_build $1 "BUILD_INFO_DELETED"
     else
         build_running_status=`curl -s ${build_url}|jshon -e result`
-        delete_build $1 $build_running_status
+        if [[ "$build_running_status" == *"SUCCESS"* ]]
+		then
+			# If its successful and there are no tempest running, then delete
+			# As we don't have an easy way of finding out the downstream job id
+			# Also, there is a possibility of a loop where gate is not deleted
+			# Will see to it once we get there
+			if [[ "${job_name}" -eq 'puppet-rjil-gate' ]]
+			then
+				#Find ongoing tempest builds and their upstream.
+				lastBuildTempest=`curl -s http://jiocloud.rustedhalo.com:8080/job/puppet-rjil-gate-tempest/api/json|jshon -e lastBuild -e number`
+				lastCompletedBuildTempest=`curl -s http://jiocloud.rustedhalo.com:8080/job/puppet-rjil-gate-tempest/api/json|jshon -e lastCompletedBuild -e number`
+				if [[ "${lastCompletedBuildTempest}" -eq "${lastBuildTempest}" ]]
+				then
+					# No active running tempest, delete build
+					delete_build $1 $build_running_status
+				else
+					# Else check the ongoing tempest runs
+					let countOngoingTempest=${lastBuildTempest}-${lastCompletedBuildTempest}
+					for c in `seq 0 ${countOngoingTempest}`
+					do
+						let tempestjobid=${lastBuildTempest}-${c}
+						upstreamBuild=`curl -s http://jiocloud.rustedhalo.com:8080/job/puppet-rjil-gate-tempest/12/api/json|jshon -e actions -e 1 -e causes -e 1 -e upstreamBuild`
+						if [[ "${upstreamBuild}" -eq "${build_number}" ]]
+						then
+							# This is the downstream tempest for our gate and in progress
+							# We can check again if its still on, but its ok, let it sit for one more hour
+							delete_build $1 'null'
+						fi
+					done
+				fi
+			fi
+		else
+			delete_build $1 $build_running_status
+		fi
     fi
 }
 
