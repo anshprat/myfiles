@@ -2,7 +2,7 @@ cd /home/anshup/tmp
 latest_file=latest-novalist
 rm $latest_file
 file=nl_`date +%F-%s`
-source /home/anshup/git/anshprat/myfiles/private_keys/jenkins_oc_rc
+#source /home/anshup/git/anshprat/myfiles/private_keys/jio_gate
 nova list>$file
 ln -s $file $latest_file
 #less $latest_file
