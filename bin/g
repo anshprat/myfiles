@@ -1,6 +1,9 @@
 #!/bin/bash
 declare -A git_command
+
 git_command=(["co"]="checkout" ["stat"]="status" ["d"]="diff" ["amend"]="commit --amend" ["force"]="push --force")
+#git_command=(["key"]="value")
+
 cmd1=$1
 if [ ${#git_command[$cmd1]} -gt 0 ]
 then
