@@ -1,0 +1,21 @@
+#!/usr/bin/expect
+
+set timeout 20
+
+set ip [lindex $argv 0]
+
+set user [lindex $argv 1]
+
+set password [lindex $argv 2]
+
+spawn loginilo $ip
+
+expect "provisioner@10.204.$ip's password:"
+
+send "Provi@123\r";
+
+expect "</>hpiLO->"
+
+send "textcons\r"
+
+interact

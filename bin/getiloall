@@ -1,0 +1,25 @@
+#!/bin/bash
+#set -xe
+cd $HOME/tmp
+ts=`date +%F-%s`
+nova list>ironic-nova-list_${ts}
+ironic node-list>ironic-node-list_${ts}
+#for i in `awk -F '|' '$3 !~ "^ None" {print $2}' ironic-node-list_${ts}|grep '-'`
+for i in `awk -F '|' '{print $2}' ironic-node-list_${ts}|grep '-'`
+do
+ironic node-show $i |tee -a ironic-node-show_${ts}
+done 
+grep -E 'instance_uuid|ipmi_address' ironic-node-show_${ts} >iloip_${ts}
+for i in `awk -F '|' '{print $3}' ironic-nova-list_${ts}|grep production `
+do 
+	echo $i
+	id=`grep $i ironic-nova-list_${ts}|awk -F '|' '{print $2}'`
+	echo $id
+	if [ ! -z $id ]
+	then  
+		grep $id iloip_${ts} -B1
+	fi
+done |tee prodilo_${ts}
+rm prodilo_latest 
+ln -s prodilo_${ts} prodilo_latest
+

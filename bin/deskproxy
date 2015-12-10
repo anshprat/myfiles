@@ -1,16 +1,16 @@
 #!/bin/bash
 set -xe
 
-host=${1:-bare.ril.corp.hackalyst.info}
+host=${1:-wiki.corp.jiocloud.com}
 port=${2:-8022}
 rport=${3:-22}
 
-bare="bare.ril.corp.hackalyst.info"
+bare="wiki.corp.jiocloud.com"
 desk="desk.ril.corp.hackalyst.info"
 
-#cmd="ssh -fN -L ${port}:127.0.0.1:${rport} desk.ril.corp.hackalyst.info"
-#ssh -f bare.ril.corp.hackalyst.info "${cmd}"
-ssh -fN -L ${port}:127.0.0.1:${port} $host
+cmd="ssh -fN -L ${port}:127.0.0.1:${rport} $desk"
+ssh -f $host "${cmd}"
+#ssh -fN -L ${port}:127.0.0.1:${port} $host
 
 #ssh -p ${port} 127.0.0.1
 

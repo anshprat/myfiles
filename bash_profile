@@ -7,7 +7,7 @@ fi
 
 # User specific environment and startup programs
 
-PATH=$PATH:$HOME/.local/bin:$HOME/bin:./:/home/anshup/git/anshprat/myfiles/private_keys
+PATH=$PATH:$HOME/.local/bin:$HOME/bin:./:/home/anshup/git/anshprat/myfiles/private_keys:/home/anshup/Downloads/dailydownload/android-studio/bin
 
 export PATH
 export TERM=xterm
@@ -16,9 +16,10 @@ export HISTFILESIZE=100000
 alias all='screen -d -r all||screen -S all'
 export PATH=$PATH:/usr/local/bin:./
 export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
-alias ssh='ssh -A'
+#alias ssh='ssh -A'
 alias p8='ping 8.8.8.8'
 export KEYS=/home/anshup/git/anshprat/myfiles/private_keys
+alias keys='cd $KEYS'
 alias admin="source $KEYS/admin_rc"
 alias jenkins="source $KEYS/jio_gate"
 alias devops="source $KEYS/devops_rc"
@@ -28,3 +29,6 @@ alias tmp="cd $HOME/tmp"
 alias nl="source $HOME/bin/novalist"
 export PYTHONPATH=$PYTHONPATH:/home/anshup/git/ril/python-jiocloud
 alias anshu='source /home/anshup/git/anshprat/myfiles/private_keys/anshu_rc'
+alias pj='cd $HOME/git/ril/puppet-rjil'
+alias ks='cd $HOME/git/ril/puppet-rjil-keystone'
+alias sl='ls'

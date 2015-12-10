@@ -1,6 +1,6 @@
 set -xe
 cd $HOME/git/ril/puppet-rjil
-BUILD_TAG=anshu-test-tenant-1
+BUILD_TAG=anshu-test-tenant-6
 #BUILD_TAG=jumphost-external-at
 ##
 # For creating httpproxy, uncomment the below BUILD_TAG.
@@ -9,6 +9,7 @@ BUILD_TAG=anshu-test-tenant-1
 ##
 #BUILD_TAG=external-at
 
+#export layout=ceph_full
 ##
 # layout=external only for creating httpproxy. Comment out for regular builds
 ##
@@ -29,9 +30,9 @@ export env_file="/home/anshup/git/anshprat/myfiles/private_keys/anshu_rc"
 export ssh_user=ubuntu
 ## You need to change the dns_server only if the private ip of your httpproxy is different.
 ## This should be the private ip of your httpproxy server
-#export dns_server=10.0.0.2
-#export env_http_proxy=http://${dns_server}:3128/
-#export env_https_proxy=http://${dns_server}:3128/
+export dns_server=10.0.0.3
+export env_http_proxy=http://${dns_server}:3128/
+export env_https_proxy=http://${dns_server}:3128/
 
 # You should have an environment/<cloud_provider_name_specified_below>.map.yaml
 # Use environment/jio.map.yaml as a template for your copy and update the network id there
@@ -57,7 +58,7 @@ export cloud_provider=anshu_gate
 ##
 #export puppet_modules_source_repo=https://github.com/anshprat/puppet-rjil
 export puppet_modules_source_repo=https://github.com/JioCloud/puppet-rjil
-#export puppet_modules_source_branch=test-tenant-upgrade
+#export puppet_modules_source_branch=ceph_split
 ##
 
 ######################## END OF MODIFICATIONS ################################

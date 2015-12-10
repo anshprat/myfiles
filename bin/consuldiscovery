@@ -1,0 +1,2 @@
+#!/bin/bash
+host ${1}.service.consuldiscovery.linux2go.dk

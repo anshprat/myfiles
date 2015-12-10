@@ -141,6 +141,20 @@ do
 check_build_status $i
 done
 
+echo "Checking gate/OC builds"
+reserved_builds 0 reserved
+for i in `nova list|grep testjenkins-puppet-rjil-gate |awk '{print $4}'|cut -f 5- -d '-'|sort|uniq|grep -vE "$reserved" || true`
+do
+check_build_status $i
+done
+
+echo "Checking pkg-test builds"
+reserved_builds 768834840 reserved
+for i in `nova list|grep pkg_test |awk '{print $4}'|cut -f 4- -d '_'|sort -u|grep -vE "$reserved"`
+do
+check_build_status $i
+done
+
 echo "Checking pkg-test builds"
 reserved_builds 768834840 reserved
 for i in `nova list|grep pkg_test |awk '{print $4}'|cut -f 4- -d '_'|sort -u|grep -vE "$reserved"`

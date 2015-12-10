@@ -1,0 +1,2 @@
+echo $1| cut -b 1-15 | base64
+

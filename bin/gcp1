@@ -1,0 +1,2 @@
+ssh -fN -L 1080:127.0.0.1:1080 gcp1-production
+ssh -f  gcp1-production 'ssh -D 1080 localhost'

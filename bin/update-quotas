@@ -1,0 +1,10 @@
+#!/bin/bash
+set -xe
+tenant=$1
+fip=${2:-20}
+inst_count=${3:-50}
+gb=${4:-6000}
+tid=`keystone tenant-list |grep $tenant |awk -F '|' '{print $2}'`
+neutron quota-update --floatingip ${fip} --tenant-id $tid
+nova quota-update --instances ${inst_count} $tid
+cinder quota-update --gigabytes ${gb}  $tid
