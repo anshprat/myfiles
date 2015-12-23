@@ -12,7 +12,7 @@ echo "Checking Linux distribution"
 grep -i ubuntu /etc/os-release >/dev/null
 ubuntu_found=$?
 
-if [ $ubuntu_found -eq 0 ]
+if [ "$ubuntu_found" -eq 0 ]
 then
 	ca_cert_dir="/usr/local/share/ca-certificates"
 else
@@ -24,14 +24,14 @@ else
 	fi
 fi
 
-if [ -z $ca_cert_dir ]
+if [ -z "$ca_cert_dir" ]
 then
 	echo "No supported linux distribution found, exitting :("
 	exit 1
 fi
 
 echo "Checking $ca_cert_dir"
-if [ -d $ca_cert_dir ]
+if [ -d "$ca_cert_dir" ]
 then
 	echo "$ca_cert_dir exists. Proceeding.."
 else
@@ -40,7 +40,7 @@ else
 fi
 
 
-if [ $ubuntu_found -eq 0 ]
+if [ "$ubuntu_found" -eq 0 ]
 then
 	sudo rm ${ubuntu_ss_cert_loc}
 	sudo wget ${cert_loc}/${cert_file} -O ${ubuntu_ss_cert_loc}
@@ -55,7 +55,7 @@ then
 	fi
 fi
 
-if [ $rhel_found -eq 0 ]
+if [ "$rhel_found" -eq 0 ]
 then
 	sudo rm ${rhel_ss_cert_loc}/${cert_file}
 	sudo wget ${cert_loc}/${cert_file} -O ${rhel_ss_cert_loc}/${cert_file}
