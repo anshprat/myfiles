@@ -1,0 +1,1 @@
+rpm -qa|grep ^kernel|grep -v `uname -r`|xargs -I f dnf remove -y f 
