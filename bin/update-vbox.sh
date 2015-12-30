@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -x
+set -x
 installed_version=`VBoxManage --version|cut -f 1 -d 'r'`
 
 latest_version=`curl -s http://download.virtualbox.org/virtualbox/LATEST.TXT`
