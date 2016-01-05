@@ -1,0 +1,97 @@
+#!/bin/bash
+date
+set -x
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+export layout="full"
+release="$(lsb_release -cs)"
+sudo mkdir -p /etc/facter/facts.d
+if [ -n "https" ]; then
+  export git_protocol="https"
+fi
+export no_proxy="127.0.0.1,169.254.169.254,localhost,consul,jiocloudservices.com"
+echo no_proxy="'127.0.0.1,169.254.169.254,localhost,consul,jiocloudservices.com'" >> /etc/environment
+if [ -n "http://10.140.218.59:3128" ]
+then
+  export http_proxy=http://10.140.218.59:3128
+  echo http_proxy="'http://10.140.218.59:3128'" >> /etc/environment
+fi
+if [ -n "http://10.140.218.59:3128" ]
+then
+  export https_proxy=http://10.140.218.59:3128
+  echo https_proxy="'http://10.140.218.59:3128'" >> /etc/environment
+fi
+if [ -n "nameserver" ]; then
+  echo 'nameserver 10.140.214.12' > /etc/resolv.conf
+  echo 'nameserver 10.140.214.13' >> /etc/resolv.conf
+fi
+wget -O puppet.deb -t 5 -T 30 http://apt.puppetlabs.com/puppetlabs-release-${release}.deb
+
+dpkg -i puppet.deb 
+echo "deb [arch=amd64] http://10.140.221.229/apt/anshprat/anshprat/ jiocloud main" | tee -a /etc/apt/sources.list.d/pkgbuilder.list
+wget -qO - http://10.140.221.229/apt/anshprat/anshprat/repo.key | apt-key add -
+
+n=0
+while [ $n -le 5 ]
+do
+apt-get update 
+apt-get install -y puppet software-properties-common puppet-rjil-keystone curl
+  n=$(($n+1))
+  sleep 5
+done
+
+echo 'consul_discovery_token='b98da70fac3343bb82f3326be8914bf5 > /etc/facter/facts.d/consul.txt
+# default to first 16 bytes of discovery token
+echo 'consul_gossip_encrypt='Yjk4ZGE3MGZhYzMzNDNiCg== >> /etc/facter/facts.d/consul.txt
+echo 'current_version='4 > /etc/facter/facts.d/current_version.txt
+echo 'env='stgiamjio > /etc/facter/facts.d/env.txt
+echo 'cloud_provider='jio_iam_stg > /etc/facter/facts.d/cloud_provider.txt
+
+puppet apply --config_version='echo settings' -e "ini_setting { default_manifest: path => \"/etc/puppet/puppet.conf\", section => main, setting => default_manifest, value => \"/etc/puppet/manifests/site.pp\" }"
+
+
+##
+# Disable TCP Offloading in builds on Interfaces
+# Add network config for all available interfaces, this would be usable for
+# undercloud as it will have multiple interfaces. cloudinit will only handle
+# first interface
+#
+
+if [[ $(facter is_virtual) == true ]];
+then
+  for nic in $(ifconfig -a | awk '/eth[0-9]+/ {print $1}'); do
+    netconfig_content="$netconfig_content
+file { '/etc/network/interfaces.d/${nic}':
+  ensure  => file,
+  content => 'auto $nic
+iface $nic inet dhcp
+',
+}"
+    ethtool -K ${nic} tx off
+    sed -i -e "/^exit 0$/i\ethtool -K ${nic} tx off" /etc/rc.local
+  done
+
+  puppet apply --config_version='echo settings' -e "$netconfig_content"
+fi
+
+
+
+while true
+do
+  # first install all packages to make the build as fast as possible
+  puppet apply --detailed-exitcodes `puppet config print default_manifest` --config_version='echo packages' --tags package
+  apt-get update
+  ret_code_package=$?
+  # now perform base config
+  (echo 'File<| title == "/etc/consul" |> { purge => false }'; echo 'include rjil::jiocloud' ) | puppet apply --config_version='echo bootstrap' --detailed-exitcodes --debug
+  ret_code_jio=$?
+  if [[ $ret_code_jio = 1 || $ret_code_jio = 4 || $ret_code_jio = 6 || $ret_code_package = 1 || $ret_code_package = 4 || $ret_code_package = 6 ]]
+  then
+    echo "Puppet failed. Will retry in 5 seconds"
+    sleep 5
+  else
+    break
+  fi
+done
+date
