@@ -2,7 +2,7 @@
 
 ## Variables
 cert_loc="http://10.140.221.229/share/"
-cert_file="iam.ind-west-1.staging.jiocloudservices.com.crt"
+cert_file="iam.ind-west-1.staging.deprecated.jiocloudservices.com.crt"
 ubuntu_ss_cert_loc="/usr/local/share/ca-certificates/selfsigned.crt"
 rhel_ss_cert_loc="/etc/pki/ca-trust/source/anchors/"
 ca_pkg="ca-certificates"
