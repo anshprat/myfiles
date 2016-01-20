@@ -1,0 +1,9 @@
+#!/bin/bash
+dwldfolder=/tmp/mozilla_anshup0/
+cd $dwldfolder
+sed -i 's/DesiredHRES=4294967295/DesiredHRES=1366/' *ica
+sed -i 's/DesiredVRES=4294967295/DesiredVRES=768/'  *ica
+/opt/Citrix/ICAClient/wfica -icaroot /opt/Citrix/ICAClient ${dwldfolder}/*.ica
+
+
+

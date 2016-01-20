@@ -7,6 +7,11 @@ ubuntu_ss_cert_loc="/usr/local/share/ca-certificates/selfsigned.crt"
 rhel_ss_cert_loc="/etc/pki/ca-trust/source/anchors/"
 ca_pkg="ca-certificates"
 
+if [ "$1" == "stg" ]
+then
+	cert_file="iam.ind-west-1.staging.jiocloudservices.com.crt"
+fi
+
 echo "Checking Linux distribution"
 
 grep -i ubuntu /etc/os-release >/dev/null
@@ -44,7 +49,7 @@ if [ "$ubuntu_found" -eq 0 ]
 then
 	sudo rm ${ubuntu_ss_cert_loc}
 	sudo wget ${cert_loc}/${cert_file} -O ${ubuntu_ss_cert_loc}
-	sudo update-ca-certificates --fresh
+	sudo update-ca-certificates 
 	certs_update=$?
 	if [ $certs_update -eq 0 ]
 	then
