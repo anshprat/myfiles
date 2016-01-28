@@ -31,4 +31,5 @@ export PYTHONPATH=$PYTHONPATH:/home/anshup/git/ril/python-jiocloud
 alias anshu='source /home/anshup/git/anshprat/myfiles/private_keys/anshu_rc'
 alias pj='cd $HOME/git/ril/puppet-rjil'
 alias ks='cd $HOME/git/ril/puppet-rjil-keystone'
+alias oc='cd $HOME/git/ril/python-overcast.django'
 alias sl='ls'
