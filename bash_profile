@@ -1,13 +1,13 @@
 # .bash_profile
 
 # Get the aliases and functions
-if [ -f ~/.bashrc ]; then
-	. ~/.bashrc
-fi
+#if [ -f ~/.bashrc ]; then
+#	. ~/.bashrc
+#fi
 
 # User specific environment and startup programs
 
-PATH=$PATH:$HOME/.local/bin:$HOME/bin:./:/home/anshup/git/anshprat/myfiles/private_keys:/home/anshup/Downloads/dailydownload/android-studio/bin
+PATH=$HOME/bin:./:$PATH
 
 export PATH
 export TERM=xterm
@@ -20,16 +20,9 @@ export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 alias p8='ping 8.8.8.8'
 export KEYS=/home/anshup/git/anshprat/myfiles/private_keys
 alias keys='cd $KEYS'
-alias admin="source $KEYS/admin_rc"
-alias jenkins="source $KEYS/jio_gate"
-alias devops="source $KEYS/devops_rc"
-alias oss="source $KEYS/oss_rc"
-alias uc="source $KEYS/undercloud-admin_rc"
 alias tmp="cd $HOME/tmp"
-alias nl="source $HOME/bin/novalist"
-export PYTHONPATH=$PYTHONPATH:/home/anshup/git/ril/python-jiocloud
-alias anshu='source /home/anshup/git/anshprat/myfiles/private_keys/anshu_rc'
-alias pj='cd $HOME/git/ril/puppet-rjil'
-alias ks='cd $HOME/git/ril/puppet-rjil-keystone'
-alias oc='cd $HOME/git/ril/python-overcast.django'
 alias sl='ls'
+export VAGRANT_DEFAULT_PROVIDER=virtualbox
+export GIT="$HOME/git/"
+alias sc="cd $GIT/sc"
+#alias /usr/lib64/firefox/plugin-container='optirun /usr/lib64/firefox/plugin-container.orig'
