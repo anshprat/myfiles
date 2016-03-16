@@ -1,0 +1,2 @@
+#!/bin/bash
+firefox -P adsense https://www.google.com/adsense &

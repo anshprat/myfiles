@@ -1,0 +1,4 @@
+search sg.aws.sportscafe.in sportscafe.in
+nameserver 127.0.0.1
+nameserver 8.8.8.8
+options ndots:4
