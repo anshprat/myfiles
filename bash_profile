@@ -26,4 +26,5 @@ export VAGRANT_DEFAULT_PROVIDER=virtualbox
 export GIT="$HOME/git/"
 alias sc="cd $GIT/sc"
 alias scd="cd $GIT/sc/docker/web.2/scweb"
+alias scr="cd $GIT/sc/screact"
 #alias /usr/lib64/firefox/plugin-container='optirun /usr/lib64/firefox/plugin-container.orig'
