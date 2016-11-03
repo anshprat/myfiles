@@ -7,7 +7,7 @@
 
 # User specific environment and startup programs
 
-PATH=$HOME/bin:./:$PATH
+PATH=$HOME/bin:./:$PATH:/usr/local/bin/:/usr/local/go/bin
 
 export PATH
 export TERM=xterm
@@ -18,13 +18,16 @@ export PATH=$PATH:/usr/local/bin:./
 export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 #alias ssh='ssh -A'
 alias p8='ping 8.8.8.8'
-export KEYS=/home/anshup/git/anshprat/myfiles/private_keys
+export KEYS=$HOME/code/anshprat/myfiles/private_keys
 alias keys='cd $KEYS'
 alias tmp="cd $HOME/tmp"
 alias sl='ls'
 export VAGRANT_DEFAULT_PROVIDER=virtualbox
-export GIT="$HOME/git/"
+export GIT="$HOME/code/"
 alias sc="cd $GIT/sc"
 alias scd="cd $GIT/sc/docker/web.2/scweb"
 alias scr="cd $GIT/sc/screact"
 #alias /usr/lib64/firefox/plugin-container='optirun /usr/lib64/firefox/plugin-container.orig'
+export PS1=" ${debian_chroot:+($debian_chroot)}:\w\>"
+complete -W "$(echo `cat ~/.ssh/known_hosts | cut -f 1 -d ' ' | sed -e s/,.*//g | uniq | grep -v "\["`;)" ssh
+#~/bin/ff-sync

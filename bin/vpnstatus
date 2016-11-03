@@ -1,0 +1,1 @@
+ps aux|grep vpn|grep -v grep

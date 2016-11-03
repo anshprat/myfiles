@@ -4,7 +4,7 @@ g s
 g b -v
 g r -v
 g checkout master
-g fetch sc
-g rebase sc/master
+g fetch fc
+g rebase fc/master
 g push
 g checkout "${pb}"

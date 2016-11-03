@@ -1,2 +1,2 @@
-sudo pkill openconnect
+sudo pkill openvpn
 pkill keepalivevpn

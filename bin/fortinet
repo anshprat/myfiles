@@ -1,0 +1,19 @@
+#!/bin/bash
+#killvpn
+set -x
+gw_ip=`route -n|grep ^0|grep UG|awk '{print $2}'|head -n1`
+echo $gw_ip
+nohup $HOME/bin/fortinetvpn &
+sleep 35
+vpn_device=`ifconfig |grep -E 'ppp0'|cut -f 1 -d ':'|awk '{print $1}'`
+sudo route del -net 0.0.0.0 netmask 0.0.0.0 dev $vpn_device
+sudo route add default gw $gw_ip
+sudo route add -net 30.0.0.0/16 dev $vpn_device
+sudo route add -net 20.0.0.0/16 dev $vpn_device
+#sudo route add -net 10.247.0.0/16 dev $vpn_device
+#sudo route add -net 10.248.0.0/16 dev $vpn_device
+#sudo route add -net 10.20.49.222/32 dev $vpn_device
+sudo route add -net 10.204.0.0/16 dev $vpn_device
+sudo route add -net 10.140.0.0/16 dev $vpn_device
+#keepalivevpn
+#sudo cp /etc/resolv.conf.vpn /etc/resolv.conf

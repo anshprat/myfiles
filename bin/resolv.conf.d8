@@ -1,4 +1,6 @@
-search web.int.sg.aws.sportscafe.in sportscafe.in
+#search web.int.sg.aws.sportscafe.in sportscafe.in sga.freecharge.com freecharge.in freecharge.com
+#search sg1.freecharge.com sga.freecharge.com sga.freecharge.in freecharge.in freecharge.com
+#nameserver 172.21.16.50
 nameserver 127.0.0.1
 nameserver 8.8.8.8
 options ndots:4

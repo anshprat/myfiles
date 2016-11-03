@@ -1,4 +1,4 @@
 echo 'nameserver 8.8.8.8'|sudo tee /etc/resolv.conf
 sudo kill $(ps aux|grep dnsmasq|grep -v grep|awk '{print $2}')
-sudo service dnsmasq restart
-sudo cp $HOME/bin/resolv.conf.d8 /etc/resolv.conf
+#sudo service dnsmasq restart
+#sudo cp $HOME/bin/resolv.conf.d8 /etc/resolv.conf

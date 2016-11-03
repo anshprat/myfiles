@@ -1,0 +1,6 @@
+if [ "$#" -eq 1 ]
+then
+sudo openvpn --config $KEYS/sga.conf
+else
+sudo openvpn --config $KEYS/fcvpn.conf --auth-user-pass $KEYS/vpncreds --auth-nocache &
+fi

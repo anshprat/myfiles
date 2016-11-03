@@ -1,0 +1,20 @@
+#echo 'nameserver 172.21.16.50'|sudo tee -a /etc/resolv.conf
+#echo 'nameserver 8.8.8.8'|sudo tee -a /etc/resolv.conf
+#sudo kill $(ps aux|grep dnsmasq|grep -v grep|awk '{print $2}')
+#sudo service dnsmasq restart
+echo 'search mum.aws.pfc.internal mum.aws.fc.internal sg.aws.pym.fc.internal sg.aws.fc.internal corp.freecharge.com sga.freecharge.in sg1.freecharge.com sga.freecharge.com freecharge.in freecharge.com'|sudo tee /etc/resolv.conf
+#dig google.com @172.16.32.10 +time=1
+ns=172.21.16.50
+#ns=172.16.32.10
+dig google.com @${ns} +time=1
+rv=$?
+if [ "${rv}" -eq 0 ]
+then
+echo "nameserver $ns"|sudo tee -a /etc/resolv.conf
+fi
+
+echo 'nameserver 127.0.0.1
+nameserver 8.8.8.8
+options ndots:4'|sudo tee -a /etc/resolv.conf
+sudo pkill dnsmasq
+sudo service dnsmasq restart

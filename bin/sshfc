@@ -1,0 +1,8 @@
+#!/usr/bin/expect
+set timeout 20
+set ip [lindex $argv 0]
+spawn ssh $ip
+expect "fcap17965@$ip's password:"
+send "now\r";
+interact
+

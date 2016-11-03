@@ -1,0 +1,7 @@
+#!/bin/bash
+ps -u $(whoami) | grep ssh-agent &> /dev/null
+if [ $? -ne 0 ];then
+    eval $(ssh-agent)
+    ssh-add
+fi
+trap 'ssh-agent -k; exit' 0
