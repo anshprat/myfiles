@@ -1,0 +1,7 @@
+if [ ! -e "$HOME/bin" ] ; then
+    # code if the symlink is broken
+    if [ -f /etc/rc.d/rc.local ] ; then
+      sudo /etc/rc.d/rc.local
+    fi
+fi
+

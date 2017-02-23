@@ -3,6 +3,6 @@ set timeout 20
 set ip [lindex $argv 0]
 spawn ssh $ip
 expect "fcap17965@$ip's password:"
-send "now\r";
+send "d9511074cd6d279ca4745583fdf6ac5a\r";
 interact
 

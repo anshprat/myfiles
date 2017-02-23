@@ -1,0 +1,13 @@
+    dockerchrome() {
+      xquartz_if_not_running
+      docker_if_not_running
+      xhost +$(docker-machine ip ${C_DOCKER_MACHINE})
+
+      docker run \
+        --rm \
+        --memory 512mb \
+        --net host \
+        --security-opt seccomp:unconfined \
+        -e DISPLAY=$(docker-machine inspect ${C_DOCKER_MACHINE} --format={{.Driver.HostOnlyCIDR}} | cut -d'/' -f1):0 \
+        jess/chrome
+    }

@@ -129,16 +129,8 @@ from boto import ec2
 from boto import rds
 from boto import elasticache
 from boto import route53
+from boto import sts
 import six
-
-from ansible.module_utils import ec2 as ec2_utils
-
-HAS_BOTO3 = False
-try:
-    import boto3
-    HAS_BOTO3 = True
-except ImportError:
-    pass
 
 from six.moves import configparser
 from collections import defaultdict
@@ -148,6 +140,8 @@ try:
 except ImportError:
     import simplejson as json
 
+
+connect_args ={}
 
 class Ec2Inventory(object):
 
@@ -166,9 +160,6 @@ class Ec2Inventory(object):
 
         # Boto profile to use (if any)
         self.boto_profile = None
-
-        # AWS credentials.
-        self.credentials = {}
 
         # Read settings and parse CLI arguments
         self.parse_cli_args()
@@ -237,7 +228,7 @@ class Ec2Inventory(object):
         configRegions_exclude = config.get('ec2', 'regions_exclude')
         if (configRegions == 'all'):
             if self.eucalyptus_host:
-                self.regions.append(boto.connect_euca(host=self.eucalyptus_host).region.name, **self.credentials)
+                self.regions.append(boto.connect_euca(host=self.eucalyptus_host).region.name)
             else:
                 for regionInfo in ec2.regions():
                     if regionInfo.name not in configRegions_exclude:
@@ -273,12 +264,6 @@ class Ec2Inventory(object):
         self.rds_enabled = True
         if config.has_option('ec2', 'rds'):
             self.rds_enabled = config.getboolean('ec2', 'rds')
-
-        # Include RDS cluster instances?
-        if config.has_option('ec2', 'include_rds_clusters'):
-            self.include_rds_clusters = config.getboolean('ec2', 'include_rds_clusters')
-        else:
-            self.include_rds_clusters = False
 
         # Include ElastiCache instances?
         self.elasticache_enabled = True
@@ -342,29 +327,6 @@ class Ec2Inventory(object):
         if config.has_option('ec2', 'boto_profile') and not self.boto_profile:
             self.boto_profile = config.get('ec2', 'boto_profile')
 
-        # AWS credentials (prefer environment variables)
-        if not (self.boto_profile or os.environ.get('AWS_ACCESS_KEY_ID') or
-                os.environ.get('AWS_PROFILE')):
-            if config.has_option('credentials', 'aws_access_key_id'):
-                aws_access_key_id = config.get('credentials', 'aws_access_key_id')
-            else:
-                aws_access_key_id = None
-            if config.has_option('credentials', 'aws_secret_access_key'):
-                aws_secret_access_key = config.get('credentials', 'aws_secret_access_key')
-            else:
-                aws_secret_access_key = None
-            if config.has_option('credentials', 'aws_security_token'):
-                aws_security_token = config.get('credentials', 'aws_security_token')
-            else:
-                aws_security_token = None
-            if aws_access_key_id:
-                self.credentials = {
-                    'aws_access_key_id': aws_access_key_id,
-                    'aws_secret_access_key': aws_secret_access_key
-                }
-                if aws_security_token:
-                    self.credentials['security_token'] = aws_security_token
-
         # Cache related
         cache_dir = os.path.expanduser(config.get('ec2', 'cache_path'))
         if self.boto_profile:
@@ -374,9 +336,8 @@ class Ec2Inventory(object):
 
         cache_name = 'ansible-ec2'
         aws_profile = lambda: (self.boto_profile or
-                               os.environ.get('AWS_PROFILE') or
-                               os.environ.get('AWS_ACCESS_KEY_ID') or
-                               self.credentials.get('aws_access_key_id', None))
+                              os.environ.get('AWS_PROFILE') or
+                              os.environ.get('AWS_ACCESS_KEY_ID'))
         if aws_profile():
             cache_name = '%s-%s' % (cache_name, aws_profile())
         self.cache_path_cache = cache_dir + "/%s.cache" % cache_name
@@ -489,8 +450,6 @@ class Ec2Inventory(object):
             if self.elasticache_enabled:
                 self.get_elasticache_clusters_by_region(region)
                 self.get_elasticache_replication_groups_by_region(region)
-            if self.include_rds_clusters:
-                self.include_rds_clusters_by_region(region)
 
         self.write_to_cache(self.inventory, self.cache_path_cache)
         self.write_to_cache(self.index, self.cache_path_index)
@@ -498,28 +457,74 @@ class Ec2Inventory(object):
     def connect(self, region):
         ''' create connection to api server'''
         if self.eucalyptus:
-            conn = boto.connect_euca(host=self.eucalyptus_host, **self.credentials)
+            conn = boto.connect_euca(host=self.eucalyptus_host)
             conn.APIVersion = '2010-08-31'
         else:
             conn = self.connect_to_aws(ec2, region)
         return conn
 
-    def boto_fix_security_token_in_profile(self, connect_args):
-        ''' monkey patch for boto issue boto/boto#2100 '''
-        profile = 'profile ' + self.boto_profile
-        if boto.config.has_option(profile, 'aws_security_token'):
-            connect_args['security_token'] = boto.config.get(profile, 'aws_security_token')
-        return connect_args
+    def get_option(self, config, section, option):
+        try:
+            opt = config.get('%s' % section, option)
+        except (NoOptionError, NoSectionError):
+            print("Couldn't find %s in profile %s" % (option, section))
+            sys.exit(1)
+
+        return opt
+
+    def assume_role(self, region, profile):
+        # assume role
+
+        global connect_args
+
+        if six.PY3:
+            aws_creds  = configparser.ConfigParser()
+            aws_config = configparser.ConfigParser()
+        else:
+            aws_creds  = configparser.SafeConfigParser()
+            aws_config = configparser.SafeConfigParser()
+
+        aws_creds.read(os.path.expanduser("~/.aws/credentials"))
+        aws_config.read(os.path.expanduser("~/.aws/config"))
+
+        source_profile = self.get_option(aws_config, profile, 'source_profile')
+        arn            = self.get_option(aws_config, profile, 'role_arn')
+        aws_access_key = self.get_option(aws_creds, source_profile, 'aws_access_key_id')
+        aws_secret_key = self.get_option(aws_creds, source_profile, 'aws_secret_access_key')
+        session_name   = "role_session_name_" + self.boto_profile
+
+        sts_conn = sts.STSConnection(aws_access_key, aws_secret_key)
+        assume_role = sts_conn.assume_role(role_arn=arn, role_session_name=session_name)
+        connect_args['aws_access_key_id']     = assume_role.credentials.access_key
+        connect_args['aws_secret_access_key'] = assume_role.credentials.secret_key
+        connect_args['security_token']        = assume_role.credentials.session_token
 
     def connect_to_aws(self, module, region):
-        connect_args = self.credentials
+
+        global connect_args
 
         # only pass the profile name if it's set (as it is not supported by older boto versions)
         if self.boto_profile:
+          profile = 'profile ' + self.boto_profile
+          if boto.config.has_option(profile, 'aws_security_token'):
             connect_args['profile_name'] = self.boto_profile
-            self.boto_fix_security_token_in_profile(connect_args)
+            connect_args['security_token'] = boto.config.get(profile, 'aws_security_token')
+          elif os.path.isfile(os.path.expanduser('~/.aws/config')):
+            self.assume_role(region, profile)
+          else:
+            self.fail_with_error('Not get profile properly\n')
+        else:
+          if ( 'AWS_SECRET_ACCESS_KEY' in os.environ and 'AWS_ACCESS_KEY_ID' in os.environ ):
+            connect_args['aws_secret_access_key']=os.environ['AWS_SECRET_ACCESS_KEY']
+            connect_args['aws_access_key_id']=os.environ['AWS_ACCESS_KEY_ID']
+            if 'AWS_SESSION_TOKEN' in os.environ :
+               connect_args['security_token']=os.environ['AWS_SESSION_TOKEN']
 
-        conn = module.connect_to_region(region, **connect_args)
+        if not connect_args:
+          conn = module.connect_to_region(region)
+        else:
+          conn = module.connect_to_region(region, **connect_args)
+
         # connect_to_region will fail "silently" by returning None if the region name is wrong or not supported
         if conn is None:
             self.fail_with_error("region name: %s likely not supported, or AWS is down.  connection to region failed." % region)
@@ -538,32 +543,15 @@ class Ec2Inventory(object):
             else:
                 reservations = conn.get_all_instances()
 
-            # Pull the tags back in a second step
-            # AWS are on record as saying that the tags fetched in the first `get_all_instances` request are not
-            # reliable and may be missing, and the only way to guarantee they are there is by calling `get_all_tags`
-            instance_ids = []
-            for reservation in reservations:
-                instance_ids.extend([instance.id for instance in reservation.instances])
-
-            max_filter_value = 199
-            tags = []
-            for i in range(0, len(instance_ids), max_filter_value):
-                tags.extend(conn.get_all_tags(filters={'resource-type': 'instance', 'resource-id': instance_ids[i:i+max_filter_value]}))
-
-            tags_by_instance_id = defaultdict(dict)
-            for tag in tags:
-                tags_by_instance_id[tag.res_id][tag.name] = tag.value
-
             for reservation in reservations:
                 for instance in reservation.instances:
-                    instance.tags = tags_by_instance_id[instance.id]
                     self.add_instance(instance, region)
 
         except boto.exception.BotoServerError as e:
             if e.error_code == 'AuthFailure':
                 error = self.get_auth_error_message()
             else:
-                backend = 'Eucalyptus' if self.eucalyptus else 'AWS'
+                backend = 'Eucalyptus' if self.eucalyptus else 'AWS' 
                 error = "Error connecting to %s backend.\n%s" % (backend, e.message)
             self.fail_with_error(error, 'getting EC2 instances')
 
@@ -590,65 +578,6 @@ class Ec2Inventory(object):
             if not e.reason == "Forbidden":
                 error = "Looks like AWS RDS is down:\n%s" % e.message
             self.fail_with_error(error, 'getting RDS instances')
-
-    def include_rds_clusters_by_region(self, region):
-        if not HAS_BOTO3:
-            self.fail_with_error("Working with RDS clusters requires boto3 - please install boto3 and try again",
-                                 "getting RDS clusters")
-
-        client = ec2_utils.boto3_inventory_conn('client', 'rds', region, **self.credentials)
-
-        marker, clusters = '', []
-        while marker is not None:
-            resp = client.describe_db_clusters(Marker=marker)
-            clusters.extend(resp["DBClusters"])
-            marker = resp.get('Marker', None)
-
-        account_id = boto.connect_iam().get_user().arn.split(':')[4]
-        c_dict = {}
-        for c in clusters:
-            # remove these datetime objects as there is no serialisation to json
-            # currently in place and we don't need the data yet
-            if 'EarliestRestorableTime' in c:
-                del c['EarliestRestorableTime']
-            if 'LatestRestorableTime' in c:
-                del c['LatestRestorableTime']
-
-            if self.ec2_instance_filters == {}:
-                matches_filter = True
-            else:
-                matches_filter = False
-
-            try:
-                # arn:aws:rds:<region>:<account number>:<resourcetype>:<name>
-                tags = client.list_tags_for_resource(
-                    ResourceName='arn:aws:rds:' + region + ':' + account_id + ':cluster:' + c['DBClusterIdentifier'])
-                c['Tags'] = tags['TagList']
-
-                if self.ec2_instance_filters:
-                    for filter_key, filter_values in self.ec2_instance_filters.items():
-                        # get AWS tag key e.g. tag:env will be 'env'
-                        tag_name = filter_key.split(":", 1)[1]
-                        # Filter values is a list (if you put multiple values for the same tag name)
-                        matches_filter = any(d['Key'] == tag_name and d['Value'] in filter_values for d in c['Tags'])
-
-                        if matches_filter:
-                            # it matches a filter, so stop looking for further matches
-                            break
-
-            except Exception as e:
-                if e.message.find('DBInstanceNotFound') >= 0:
-                    # AWS RDS bug (2016-01-06) means deletion does not fully complete and leave an 'empty' cluster.
-                    # Ignore errors when trying to find tags for these
-                    pass
-
-            # ignore empty clusters caused by AWS bug
-            if len(c['DBClusterMembers']) == 0:
-                continue
-            elif matches_filter:
-                c_dict[c['DBClusterIdentifier']] = c
-
-        self.inventory['db_clusters'] = c_dict
 
     def get_elasticache_clusters_by_region(self, region):
         ''' Makes an AWS API call to the list of ElastiCache clusters (with
@@ -788,8 +717,8 @@ class Ec2Inventory(object):
         # If we can't get a nice hostname, use the destination address
         if not hostname:
             hostname = dest
-        else:
-            hostname = self.to_safe(hostname).lower()
+
+        hostname = self.to_safe(hostname).lower()
 
         # if we only want to include hosts that match a pattern, skip those that don't
         if self.pattern_include and not self.pattern_include.match(hostname):
@@ -859,7 +788,7 @@ class Ec2Inventory(object):
                     if self.nested_groups:
                         self.push_group(self.inventory, 'security_groups', key)
             except AttributeError:
-                self.fail_with_error('\n'.join(['Package boto seems a bit older.',
+                self.fail_with_error('\n'.join(['Package boto seems a bit older.', 
                                             'Please upgrade boto >= 2.3.0.']))
 
         # Inventory: Group by tag keys
@@ -978,7 +907,7 @@ class Ec2Inventory(object):
                         self.push_group(self.inventory, 'security_groups', key)
 
             except AttributeError:
-                self.fail_with_error('\n'.join(['Package boto seems a bit older.',
+                self.fail_with_error('\n'.join(['Package boto seems a bit older.', 
                                             'Please upgrade boto >= 2.3.0.']))
 
 
@@ -1503,3 +1432,4 @@ class Ec2Inventory(object):
 
 # Run the script
 Ec2Inventory()
+

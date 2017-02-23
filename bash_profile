@@ -7,7 +7,7 @@
 
 # User specific environment and startup programs
 
-PATH=$HOME/bin:./:$PATH:/usr/local/bin/:/usr/local/go/bin
+PATH=$HOME/bin:./:$PATH:/usr/local/bin/:/usr/local/go/bin:/usr/local/sbin
 
 export PATH
 export TERM=xterm
