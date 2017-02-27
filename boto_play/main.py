@@ -8,8 +8,9 @@ from pricing import price_dict_ec2, price_dict_ebs
 import sys
 import statsd
 from time import gmtime, strftime
+from datetime import datetime
 
-print strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
+print str(datetime.now())
 # print price_dict_ebs
 # sys.exit()
 
