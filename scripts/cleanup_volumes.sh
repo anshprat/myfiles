@@ -1,0 +1,1 @@
+for p in `stsAssumeRole.sh list`; do for i in `cat ~/bin/aws-regions.txt `; do echo $p,$i; aws ec2 describe-volumes --filters "Name=status,Values=available,error" --region $i --profile $p ; done; done
