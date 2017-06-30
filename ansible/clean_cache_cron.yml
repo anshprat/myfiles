@@ -1,0 +1,8 @@
+---
+- hosts: "{{ hosts }}"
+  become: true
+  tasks:
+  - set_fact: 
+     rand_min="{{ 6 | random }}"
+  - name: set cron
+    cron: name=clean_mem_cache minute="*/{{rand_min}}" job="sudo sync && echo 3|sudo tee /proc/sys/vm/drop_caches" state=present user=root

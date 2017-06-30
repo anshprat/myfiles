@@ -21,13 +21,13 @@ check_ec2 = True
 
 statsdc = statsd.StatsClient('statsd01.corp.freecharge.com', 8125, prefix=statsd_prefix)
 
-roles_dict = {'glassfish':'arn:aws:iam::538360184485:role/GlassFish-Prod-PowerUsers',
-				'freechargeProd':'arn:aws:iam::695210568016:role/FreeCharge-Prod-PowerUsers',
-				'freechargeDev':'arn:aws:iam::186079218002:role/FreeCharge-Dev-PowerUsers',
-				'klickpay':'arn:aws:iam::608836331289:role/KlickPay-Prod-PowerUsers',
-				'blueshark':'arn:aws:iam::077358570399:role/Wallet-Prod-PowerUsers',
-				'nebula':'arn:aws:iam::355100291228:role/Nebula-Dev-PowerUsers',
-				'whirlpool':'arn:aws:iam::259209043622:role/Whirlpool-QA-PowerUsers',
+roles_dict = {'glassfish':'arn:aws:iam::538360184485:role/GlassFish-Prod-PolicyMakers',
+				'freechargeProd':'arn:aws:iam::695210568016:role/FreeCharge-Prod-PolicyMakers',
+				'freechargeDev':'arn:aws:iam::186079218002:role/FreeCharge-Dev-PolicyMakers',
+				'klickpay':'arn:aws:iam::608836331289:role/KlickPay-Prod-PolicyMakers',
+				'blueshark':'arn:aws:iam::077358570399:role/Wallet-Prod-PolicyMakers',
+				'nebula':'arn:aws:iam::355100291228:role/Nebula-PolicyMakers',
+				'whirlpool':'arn:aws:iam::259209043622:role/Whirlpool-QA-PolicyMakers',
 				'identity':'arn:aws:iam::020272951068:role/IdentityPowerUsers'
 				}
 

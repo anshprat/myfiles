@@ -13,7 +13,7 @@ from datetime import datetime
 print str(datetime.now())
 # print price_dict_ebs
 # sys.exit()
-
+ip_address = []
 statsd_prefix = 'costrack.aws'
 print_region_details = False
 print_ebs_details = False
@@ -82,37 +82,41 @@ for role in roles_dict:
 		# print role,region
 
 		region_ebs = {}
-		ebs = ec2.volumes.all()
-		# Filters=[{'Name': 'status','Values': ['available',]}]
-		for v in ebs:
-			# if v.state == 'available':
-			# 	print v.id
-			# sys.exit()
-			# region_ebs[v.id]=[v.size,v.volume_type,v.iops]
-			region_ebs[v.id] = {'v':v.volume_type, 's':v.size, 'i':v.iops,'c':calc_ebs_cost(region,v.size,v.iops,v.volume_type)}
-			if print_ebs_details == True:
-				print v.id, region_ebs[v.id]
+		# ebs = ec2.volumes.all()
+		# # Filters=[{'Name': 'status','Values': ['available',]}]
+		# for v in ebs:
+		# 	# if v.state == 'available':
+		# 	# 	print v.id
+		# 	# sys.exit()
+		# 	# region_ebs[v.id]=[v.size,v.volume_type,v.iops]
+		# 	region_ebs[v.id] = {'v':v.volume_type, 's':v.size, 'i':v.iops,'c':calc_ebs_cost(region,v.size,v.iops,v.volume_type)}
+		# 	if print_ebs_details == True:
+		# 		print v.id, region_ebs[v.id]
 
-		# print ebs
-		if len(region_ebs)>0:
-			region_ebs_c = {}
-			# print region_ebs
-			for v in region_ebs:
-				region_ebs_c[v] = region_ebs[v]['c']
-				# print 'DEBUG: Individual cost',region_ebs[v]['c']
-			region_ebs_cost = sum(region_ebs_c.values())
-			# print 'DEBUG: region_ebs_cost cost',region_ebs_cost
-			print '\n',header,separator,'ebs',separator,'cost',separator,region_ebs_cost
-			statsdc.gauge('cost.'+role+'.'+region+'.ebs.', region_ebs_cost)
-			role_cost_ebs[region] = sum(region_ebs_c.values())
-			# print 'DEBUG: role_cost_region',role_cost_ebs[region]
+		# # print ebs
+		# if len(region_ebs)>0:
+		# 	region_ebs_c = {}
+		# 	# print region_ebs
+		# 	for v in region_ebs:
+		# 		region_ebs_c[v] = region_ebs[v]['c']
+		# 		# print 'DEBUG: Individual cost',region_ebs[v]['c']
+		# 	region_ebs_cost = sum(region_ebs_c.values())
+		# 	# print 'DEBUG: region_ebs_cost cost',region_ebs_cost
+		# 	print '\n',header,separator,'ebs',separator,'cost',separator,region_ebs_cost
+		# 	statsdc.gauge('cost.'+role+'.'+region+'.ebs.', region_ebs_cost)
+		# 	role_cost_ebs[region] = sum(region_ebs_c.values())
+		# 	# print 'DEBUG: role_cost_region',role_cost_ebs[region]
 		
 		# Process EC2 onlt if EBS exists, else its a waste of time
-		if len(region_ebs)>0 and check_ec2 == True:
+		# if len(region_ebs)>0 and check_ec2 == True:
+		if 1:
 			instances = ec2.instances.filter(
 			    Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])
+			# print instances
 			this_region = {}
 			for instance in instances:
+				ip_address.append(instance.private_ip_address)
+				# sys.exit()
 				# print role,region,instance.id
 				this_region[instance.id]=instance.instance_type
 			all_instances.update(this_region)
@@ -121,7 +125,8 @@ for role in roles_dict:
 			if instance_count > 0: # This check is now redundant since its checked above at EBS count
 				# print 
 				region_cost = {}
-				print header,separator,'ec2',separator,'count',separator,instance_count
+				# print ip_address
+				# print header,separator,'ec2',separator,'count',separator,instance_count
 				counts = Counter(this_region.itervalues())
 				for instance in list(counts):
 					#price of this instance type count
@@ -138,25 +143,25 @@ for role in roles_dict:
 					region_cost[instance] = cost_instance_type
 					region_cost_total = sum(region_cost.values())
 
-				print header,separator,'ec2',separator,'cost',separator, region_cost_total
+				# print header,separator,'ec2',separator,'cost',separator, region_cost_total
 				role_cost[region] = region_cost_total
 			
 	print
 	ebs_cost[role] = sum(role_cost_ebs.values())
 	role_instances_count = len(all_instances)-count_before_role
-	if check_ec2 == True:	
-		print role,separator,'global',separator,'ec2',separator,'count',separator,role_instances_count	
-		print role,separator,'global',separator,'ec2',separator,'cost',separator,sum(role_cost.values())
-	print role,separator,'global',separator,'ebs',separator,'cost',separator,ebs_cost[role]
+	# if check_ec2 == True:	
+	# 	print role,separator,'global',separator,'ec2',separator,'count',separator,role_instances_count	
+	# 	print role,separator,'global',separator,'ec2',separator,'cost',separator,sum(role_cost.values())
+	# print role,separator,'global',separator,'ebs',separator,'cost',separator,ebs_cost[role]
 	ec2_cost[role] = sum(role_cost.values())
 all_instance_count = len(all_instances)	
 all_instance_cost = sum(ec2_cost.values())
 all_ebs_cost = sum(ebs_cost.values())
-print
-if check_ec2 == True:
-	print 'all roles',separator,'global',separator,'ec2',separator,'count',separator,all_instance_count
-	print 'all roles',separator,'global',separator,'ec2',separator,'cost',separator,all_instance_cost
-print 'all roles',separator,'global',separator,'ebs',separator,'cost',separator,all_ebs_cost
+# print
+# if check_ec2 == True:
+# 	print 'all roles',separator,'global',separator,'ec2',separator,'count',separator,all_instance_count
+# 	print 'all roles',separator,'global',separator,'ec2',separator,'cost',separator,all_instance_cost
+# print 'all roles',separator,'global',separator,'ebs',separator,'cost',separator,all_ebs_cost
 
 statsdc.gauge('count.all.global.ec2',all_instance_count)
 statsdc.gauge('cost.all.global.ec2', all_instance_cost)
@@ -164,5 +169,6 @@ statsdc.gauge('cost.all.global.ebs', all_ebs_cost)
 
 run_time = time.time() - start_time
 m, s = divmod(run_time,60)
+print ip_address
 print 'Total time taken to generate this report -', int(m), 'mins',separator,int(s),'secs'
 statsdc.timing('report.runtime',int(run_time*1000))

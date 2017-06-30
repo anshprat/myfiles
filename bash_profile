@@ -32,3 +32,4 @@ export PS1="\h ${debian_chroot:+($debian_chroot)}:\w\>"
 complete -W "$(echo `cat ~/.ssh/known_hosts | cut -f 1 -d ' ' | sed -e s/,.*//g | uniq | grep -v "\["`;)" ssh
 #~/bin/ff-sync
 export HISTCONTROL=ignoredups:erasedups 
+export PATH="$HOME/.rbenv/bin:$PATH"

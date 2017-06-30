@@ -70,4 +70,5 @@ def get_price(type):
 	return price_dict
 
 price_dict_ec2 = get_price('ec2')
+#print price_dict_ec2['ap-south-1']
 price_dict_ebs = get_price('ebs')

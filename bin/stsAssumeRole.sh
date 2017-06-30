@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#set -x
 LOG_FILE_TO_MONITOR=~/.aws/logs/fc_stsAssumeRole.log
 mkdir -p ~/.aws/logs
 touch ~/.aws/logs/fc_stsAssumeRole.log
