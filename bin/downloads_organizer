@@ -1,6 +1,6 @@
 #!/bin/bash
 #0 * * * * /home/anshup/bin/downloads_organizer
-
+set -x
 cd $HOME/Downloads
 
 if [ ! -d 'all' ]
@@ -8,7 +8,7 @@ then mkdir all
 fi
 
 if [ ! -d `date +%F` ]
-then mv * all  
+then find . -depth 1 -not -name 'all' -not -name '.*' -exec mv {} all \; 
 mkdir `date +%F`
 rm all/dailydownload
 ln -s `date +%F` dailydownload
