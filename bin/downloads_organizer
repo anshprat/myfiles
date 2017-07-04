@@ -1,6 +1,7 @@
 #!/bin/bash
-#0 * * * * /home/anshup/bin/downloads_organizer
-set -x
+#0 * * * * /home/anshup/bin/downloads_organizer &>/dev/null
+#redirect all o/p to dev null to avoid sending out any emails
+#set -x
 cd $HOME/Downloads
 
 if [ ! -d 'all' ]
