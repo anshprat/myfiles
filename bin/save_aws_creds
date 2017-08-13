@@ -1,0 +1,5 @@
+#!/bin/bash
+for acc in dev prod central
+do
+ /Users/anshup/bin/stsSaveTokens.sh ${acc}
+done
