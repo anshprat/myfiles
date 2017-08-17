@@ -1,0 +1,3 @@
+#!/bin/bash
+find ~/.aws/credentials -mmin +55 -exec ~/bin/save_aws_creds \;
+/usr/local/bin/terraform $@
