@@ -14,3 +14,9 @@ mkdir `date +%F`
 rm all/dailydownload
 ln -s `date +%F` dailydownload
 fi
+
+cd ~/Desktop
+if [ -f Screen* ]
+then
+mv -v Screen* screenshots/
+fi

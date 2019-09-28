@@ -1,0 +1,18 @@
+#Mac only
+set -x
+log_file=/Users/anshup/tmp/logs/wakeup_wifi.log
+#date >> $log_file
+#echo "[INFO] wakeup triggered">>$log_file
+interface_wifi=en0
+self_assigned_broadcast=169.254.255.255
+#ifconfig ${interface_wifi} >> $log_file
+/sbin/ifconfig ${interface_wifi}|/usr/bin/grep -o ${self_assigned_broadcast}
+is_dhcp_ip=$?
+if [ ${is_dhcp_ip} -eq 0 ]
+then
+ date >> $log_file
+ echo "[INFO] wifi restart" >> $log_file
+ /usr/sbin/networksetup -setairportpower ${interface_wifi} off
+ /usr/sbin/networksetup -setairportpower ${interface_wifi} on
+fi
+

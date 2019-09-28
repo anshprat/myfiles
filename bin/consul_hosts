@@ -1,0 +1,7 @@
+set +x
+PATH=$PATH:/usr/local/bin/
+status=`curl -s -m 5 https://consul01.corp.grabpay.com/v1/health/node/consul01.sg.aws.grabpay.com |docker run -i --rm anshprat/jq:latest -r '.[]|.Status' `
+if [ ${status}_ok == "passing_ok" ]
+then
+  curl -s https://consul01.corp.grabpay.com/v1/catalog/nodes |docker run -i --rm anshprat/jq:latest -r '.[]|.Node' > ~/.ssh/consul_hosts
+fi

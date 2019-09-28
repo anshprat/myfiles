@@ -1,0 +1,55 @@
+#!/bin/bash
+# This is a recursive script
+# The minimum required input is the profile name as setup for octad profile
+# After getting the token via oktad this file calls itself with the new tokens
+# to save them into the aws credentials file
+# The sed here is written for mac sed and will need changes on linux sed
+
+ set -x
+
+if [ ! -n "$1" ]
+then
+  echo "Usage: `basename $0` profile_name "
+  exit 3
+fi
+profile=${1}
+
+
+
+creds_file="$HOME/.aws/credentials"
+
+if [ ! -z "${AWS_SESSION_TOKEN}" ]
+then
+  save_creds_file=true
+fi
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -a=*|--account=*)
+      aws_account="${1#*=}"
+      ;;
+  esac
+  shift
+done
+
+if [  "${save_creds_file}" == "true" ]
+then
+  sed_opts="-i .bak -E"
+  sed ${sed_opts} '/\['"${profile}"'\]/{N;N;N;d;}' ${creds_file}
+
+  echo "[${profile}]
+aws_access_key_id = ${AWS_ACCESS_KEY_ID}
+aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}
+aws_session_token = ${AWS_SESSION_TOKEN}" >> ${creds_file}
+exit $?
+fi
+
+echo " ${profile} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} ${AWS_SESSION_TOKEN}"
+case "${aws_account}" in
+  dp)
+    $GOPATH/bin/aws-okta exec ${profile} -- /bin/bash -c "`basename $0`  ${profile} --account=${profile}"
+    ;;
+  *)
+    /usr/local/bin/oktad ${profile} -- /bin/bash -c "`basename $0` ${profile}"
+    ;;
+esac

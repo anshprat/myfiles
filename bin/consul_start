@@ -1,1 +1,2 @@
-consul agent -server -bootstrap-expect 1 -data-dir /tmp/consul -ui-dir /var/www/html/consul/ &
+export CONSUL_UI_BETA=1
+consul agent -server -bootstrap -config-dir=/opt/consul/config/ -data-dir=/opt/consul/data/ -ui -bind=`ifconfig en0|grep 'inet '|awk '{print $2}'`  &

@@ -1,2 +1,3 @@
 #!/bin/bash
-sed -i ${1}d ~/.ssh/known_hosts 
+set -x
+sed -i .backup  ${1}d ~/.ssh/known_hosts 

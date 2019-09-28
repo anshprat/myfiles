@@ -4,7 +4,7 @@
 # After getting the token via oktad this file calls itself with the new tokens
 # to save them into the aws credentials file
 # The sed here is written for mac sed and will need changes on linux sed
-
+#set -x
 if [ ! -n "$1" ]
 then
   echo "Usage: `basename $0` profile_name "
@@ -28,4 +28,4 @@ aws_session_token = ${4}" >> ${creds_file}
 exit $?
 fi
 
-/usr/local/bin/oktad ${profile} -- /bin/bash -c "`basename $0` ${profile} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} ${AWS_SESSION_TOKEN}"
+aws-okta exec ${profile} -- /bin/bash -c "`basename $0` ${profile} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} ${AWS_SESSION_TOKEN}"

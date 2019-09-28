@@ -1,0 +1,14 @@
+#!/bin/bash
+set -x
+#echo "$#"
+if [ "$#" -eq 1 ]
+then
+  if [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$  ]]
+  then
+      /usr/bin/ssh ${@}
+  else
+      /usr/bin/ssh $(host -t A $1|tail -n1|awk '{print $4}')  
+  fi
+else
+      /usr/bin/ssh ${@}
+fi

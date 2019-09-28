@@ -1,5 +1,27 @@
 #!/bin/bash
-for acc in dev prod central
+#set -x
+
+case "$1" in
+  gp)
+    account_suffix=""
+    ;;
+
+  ovo)
+    account_suffix="o"
+    ;;
+
+  dp)
+    account_suffix="dp"
+    ;;
+
+  *)
+    account_suffix=""
+    ;;
+esac
+
+for acc in ${account_suffix}dev ${account_suffix}prod ${account_suffix}central identity
+# for acc in ${account_suffix}dev
 do
- /Users/anshup/bin/stsSaveTokens.sh ${acc}
+ /Users/anshup/bin/stsSaveTokens.sh ${acc} --account=${account_suffix}
 done
+sed -i bak -e 's/\[identity\]/\[default\]/' ~/.aws/credentials

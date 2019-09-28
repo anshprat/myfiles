@@ -1,1 +1,1 @@
-VBoxHeadless -s fedoraQ &>/dev/null &
+VBoxHeadless -s Fedora30 &>/dev/null &
