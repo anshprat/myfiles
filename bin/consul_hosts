@@ -1,7 +1,24 @@
 set +x
 PATH=$PATH:/usr/local/bin/
-status=`curl -s -m 5 https://consul01.corp.grabpay.com/v1/health/node/consul01.sg.aws.grabpay.com |docker run -i --rm anshprat/jq:latest -r '.[]|.Status' `
+IFS=' '
+consuls="consul01.corp.grabpay.com consul01.cp1.moca.vn consul01.aws.ovo.id"
+consul_hosts_file="$HOME/.ssh/consul_hosts"
+if [ -s  ${consul_hosts_file} ]
+then
+  cp ${consul_hosts_file} ${consul_hosts_file}.`date +%F`
+  echo "" > ${consul_hosts_file}
+fi
+
+for consul in ${consuls}
+do
+  status=`curl -s -m 5 https://${consul}/v1/health/checks/vault |docker run -i --rm anshprat/jq:latest -r '.[0]|.Status'|head -n 1`
 if [ ${status}_ok == "passing_ok" ]
 then
-  curl -s https://consul01.corp.grabpay.com/v1/catalog/nodes |docker run -i --rm anshprat/jq:latest -r '.[]|.Node' > ~/.ssh/consul_hosts
+  curl -s https://${consul}/v1/catalog/nodes |docker run -i --rm anshprat/jq:latest -r '.[]|.Node' >> ${consul_hosts_file}
+fi
+done
+
+if [ ! -s  ${consul_hosts_file} ]
+then
+  cp ${consul_hosts_file}.`date +%F` ${consul_hosts_file}
 fi

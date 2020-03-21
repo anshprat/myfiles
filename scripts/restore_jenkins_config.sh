@@ -1,8 +1,9 @@
 #!/bin/bash
-#set -xe
+set -xe
 #sudo su jenkins
+JENKINS_HOME="/app/docker/jenkins/home"
 backup_archive=$1
-cd $HOME
+cd $JENKINS_HOME
 if ! [ -e jobs ]
   then
     echo '[WARN]jobs folder does not exist. Is it a valid jenkinst installation?'
@@ -28,20 +29,22 @@ mkdir -v $tmp_folder
 cp -v $backup_archive $tmp_folder
 tar -C $tmp_folder -xzvf $tmp_folder/$backup_archive
 
-cd $HOME/jobs
+cd $JENKINS_HOME/jobs
 
-for i in `ls ${tmp_folder}/*/*_config.xml`
-  do 
-  job_tmp=`echo $i|rev|cut -f 2- -d '_'|rev`
-  job=`basename $job_tmp`
-  mkdir -v $job
+for i in `find ${tmp_folder} -name '*config.xml'`
+  do
+  job_tmp_fp=`echo $i|rev|cut -f 2- -d '|'|rev`
+  job_tmp=`echo $job_tmp_fp|tr '|' '/'`
+  job=`echo $job_tmp|cut -f 5- -d '/'`
+  echo $job
+  mkdir -p -v $job
   cp -v $i $job/config.xml
 done
 ##
 # Assumption for restoring main jenkins config -
 # there is no job called 'main_config_*'
 ##
-mv -v main_jenkins_*/config.xml $HOME/config.xml
-rm -rvf main_jenkins_*
+#mv -v main_jenkins_*/config.xml $HOME/config.xml
+#rm -rvf main_jenkins_*
 
-rm -rf $tmp_folder
+#rm -rf $tmp_folder
