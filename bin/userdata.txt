@@ -10,8 +10,8 @@ sudo mkdir -p /etc/facter/facts.d
 if [ -n "https" ]; then
   export git_protocol="https"
 fi
-export no_proxy="127.0.0.1,169.254.169.254,localhost,consul,jiocloudservices.com"
-echo no_proxy="'127.0.0.1,169.254.169.254,localhost,consul,jiocloudservices.com'" >> /etc/environment
+export no_proxy="127.0.0.1,169.254.169.254,localhost,consul,jcs.com"
+echo no_proxy="'127.0.0.1,169.254.169.254,localhost,consul,jcs.com'" >> /etc/environment
 if [ -n "http://10.140.218.59:3128" ]
 then
   export http_proxy=http://10.140.218.59:3128

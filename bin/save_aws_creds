@@ -11,7 +11,7 @@ case "$1" in
     ;;
 
   moca)
-    account_suffix="moca"
+    account_suffix="m"
     ;;
 
   *)
