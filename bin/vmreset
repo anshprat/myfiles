@@ -1,1 +1,1 @@
-VBoxManage controlvm ubuntu-vm reset
+VBoxManage controlvm ubuntu-build reset

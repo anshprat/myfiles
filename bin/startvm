@@ -1,1 +1,1 @@
-VBoxHeadless -s Fedora30 &>/dev/null &
+VBoxHeadless -s ubuntu-build &>/dev/null &
