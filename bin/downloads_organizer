@@ -1,15 +1,26 @@
 #!/bin/bash
 #0 * * * * /home/anshup/bin/downloads_organizer &>/dev/null
 #redirect all o/p to dev null to avoid sending out any emails
-set +x
-cd $HOME/Downloads
+set -x
+basedir="$HOME/Downloads"
+cd $basedir
 
-if [ ! -d 'all' ]
-then mkdir all
-fi
+cnm() {
+  if [ ! -d $basedir ]
+    then mkdir -p $basedir
+  fi
+
+}
+
+month=`date +%m`
+year=`date +%Y`
+
+basedir="$basedir/all/$year/$month"
+
+cnm
 
 if [ ! -d `date +%F` ]
-then find . -depth 1 -not -name 'all' -not -name '.*' -exec mv {} all \; 
+then find . -depth 1 -not -name 'all' -not -name '.*' -exec mv {} ${basedir} \;
 mkdir `date +%F`
 rm all/dailydownload
 ln -s `date +%F` dailydownload
