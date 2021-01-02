@@ -1,0 +1,2 @@
+VBoxManage controlvm ubuntu-build poweroff
+startvm

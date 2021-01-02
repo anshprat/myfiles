@@ -19,8 +19,13 @@ basedir="$basedir/all/$year/$month"
 
 cnm
 
+depthparam=" -depth 1"
+if [ $OSTYPE == "linux-gnu" ]
+then
+  depthparam=" -maxdepth 1"
+fi
 if [ ! -d `date +%F` ]
-then find . -depth 1 -not -name 'all' -not -name '.*' -exec mv {} ${basedir} \;
+then find . ${depthparam} -not -name 'all' -not -name '.*' -exec mv {} ${basedir} \;
 mkdir `date +%F`
 rm all/dailydownload
 ln -s `date +%F` dailydownload
