@@ -1,4 +1,7 @@
 #!/bin/bash
+set -x
+## /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/anshprat/myfiles/master/bin/mac_setup.sh")
+
 echo "update timestamp_timeout (value is in minutes) using sudo visudo first"
 
 which brew
@@ -20,7 +23,19 @@ fi
 mkdir -p ~/tmp ~/code/{grab,anshprat,others}
 
 echo 'brew installs'
-brew install curl keybase atom postman imagemagick bitwarden ohmyzsh
+brew install curl \
+keybase \
+atom \
+postman \
+imagemagick \
+bitwarden \
+1clipboard \
+awscli \
+jq 
+
+brew install --cask docker
+
+xcode-select --install
 
 echo "bitwarden application extension needs app store install"
 
@@ -50,3 +65,25 @@ if [ ! -d ~/.oh-my-zsh ]
 then
 	sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
+
+grep "PATH" ~/.zshrc|grep "HOME/bin" |grep -v '#'
+home_bin_path_exists=$?
+
+if [ "${home_bin_path_exists}" == "$no" ]
+then
+	echo "Adding \$HOME/bin to \$PATH"
+	echo "export PATH=\$HOME/bin:\$PATH">>~/.zshrc
+fi
+
+
+command="/Users/anshup/bin/downloads_organizer"
+job='3 * * * *  '$command
+crontab -l |grep $command >/dev/null
+cron_exists=$?
+if [[ $cron_exists == $no ]]
+then
+	cat <(fgrep -i -v "$command" <(crontab -l)) <(echo "$job") | crontab -
+	echo "add cron in preferences -> full disk access"
+fi
+
+pip3 install virtualenv
