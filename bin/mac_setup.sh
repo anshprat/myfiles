@@ -75,7 +75,8 @@ awscli \
 jq \
 authy \
 terminal-notifier \
-skitch
+skitch \
+unlox
 
 do
 	check_brew_install $pkg
