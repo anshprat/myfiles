@@ -25,10 +25,11 @@ then
   depthparam=" -maxdepth 1"
 fi
 if [ ! -d `date +%F` ]
-then find . ${depthparam} -not -name 'all' -not -name '.*' -exec mv {} ${basedir} \;
-mkdir `date +%F`
-rm all/dailydownload
-ln -s `date +%F` dailydownload
+then
+  rm dailydownload
+  find . ${depthparam} -not -name 'all' -not -name '.*' -exec mv {} ${basedir} \;
+  mkdir `date +%F`
+  ln -s `date +%F` dailydownload
 fi
 
 cd ~/Desktop
