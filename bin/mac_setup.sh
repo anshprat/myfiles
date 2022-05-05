@@ -120,6 +120,7 @@ then
 	git clone keybase://private/anshu/dotfiles
 	cd dotfiles
 	cp -rvf .ssh ~/.ssh
+	chmod 400 ~/.ssh/*
 	cd -
 fi
 
