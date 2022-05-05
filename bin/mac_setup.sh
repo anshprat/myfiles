@@ -74,7 +74,8 @@ bitwarden \
 awscli \
 jq \
 authy \
-terminal-notifier
+terminal-notifier \
+skitch
 
 do
 	check_brew_install $pkg
