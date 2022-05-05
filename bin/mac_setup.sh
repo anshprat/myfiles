@@ -1,10 +1,13 @@
 #!/bin/bash
-set -x
-## /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/anshprat/myfiles/master/bin/mac_setup.sh")
+set +x
+## /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/anshprat/myfiles/master/bin/mac_setup.sh)"
 
-echo "update timestamp_timeout (value is in minutes) using sudo visudo first"
+echo "update timestamp_timeout (value is in minutes) using sudo visudo"
 
-which brew
+#TODO - check for above value in visudo and proceed accordingly
+DEV_NULL=/dev/null
+
+which brew >$DEV_NULL
 brew_exists=$?
 
 ok=0
@@ -15,15 +18,53 @@ then
 
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
+	command='eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
+
+	cat <(fgrep -i -v "$command" <(cat $HOME/.zprofile)) <(echo "$command") > $HOME/.zprofile
+
 	echo 'in case command line tools fail to install using above or xcode-select --install , then download and install from https://developer.apple.com/download/all/?q=command instead'
 
 fi
 
 
-mkdir -p ~/tmp ~/code/{grab,anshprat,others}
+mkdir -p ~/tmp/screenshots ~/code/{grab,anshprat,others}
+
+if [ ! -L "$HOME/Desktop/screenshots" ]
+then
+	ln -sv  ~/tmp/screenshots ~/Desktop/screenshots
+fi
 
 echo 'brew installs'
-brew install curl \
+
+brew_ls=`brew ls`
+
+check_brew_install() {
+	pkg=$1
+	grep $pkg <<< ${brew_ls} >$DEV_NULL  && echo -e "$pkg \b is already installed"
+	pkg_exists=$?
+	if [ "${pkg_exists}" == "$no" ]
+	then
+		export pkgs_to_install="$pkgs_to_install $pkg"
+	fi
+}
+
+do_brew_install() {
+	if [ ! -z "$1" ]
+	then
+		if [ $(($#-1)) ]
+		then
+			pkgs_to_install="${@:1:$#-1}"
+			cask="${@: -1}"
+		else
+			pkgs_to_install=$1
+		fi
+
+		echo "Installing ${cask} ${pkgs_to_install}"
+		brew install $cask $pkgs_to_install
+	fi
+}
+
+for pkg in curl \
 keybase \
 atom \
 postman \
@@ -31,24 +72,51 @@ imagemagick \
 bitwarden \
 1clipboard \
 awscli \
-jq 
+jq \
+authy \
+terminal-notifier
 
-brew install --cask docker
+do
+	check_brew_install $pkg
+done
 
-xcode-select --install
+do_brew_install $pkgs_to_install
 
-echo "bitwarden application extension needs app store install"
+unset pkgs_to_install
+
+for pkg in firefox \
+docker \
+amazon-chime
+do
+	check_brew_install $pkg
+done
+
+if [ ! -z "$pkgs_to_install" ]
+then
+	do_brew_install $pkgs_to_install --cask
+fi
+
+xcode-select --install 2>$DEV_NULL || echo 'command line tools are already installed, use "Software Update" to install updates'
+
+
+if [ ! -d /Applications/Bitwarden.app ]
+then
+	echo "bitwarden application extension needs app store install"
+	open "https://apps.apple.com/sg/app/bitwarden/id1352778147?mt=12"
+fi
+
+if [ ! -d /Applications/Speedtest.app ]
+then
+	open "https://apps.apple.com/sg/app/speedtest-by-ookla/id1153157709?mt=12"
+fi
 
 mkdir -p ~/code/{grab,anshprat,others}
 
 cd ~/code/anshprat
 
-open /Applications/Keybase.app
-
-cd ~/code/anshprat
-
 if [ ! -d dotfiles ]
 then
+	open /Applications/Keybase.app
 	git clone keybase://private/anshu/dotfiles
 	cd dotfiles
 	cp -rvf .ssh ~/.ssh
@@ -57,7 +125,10 @@ fi
 
 if [ ! -d myfiles ]
 then
-	git clone git@github.com:anshprat/myfiles.git
+	git clone https://github.com/anshprat/myfiles.git
+	cd myfiles
+	git remote remove origin
+	git remote add origin ssh://git@github.com:anshprat/myfiles.git
 	ln -s ~/code/anshprat/myfiles/bin ~/bin
 fi
 
@@ -66,7 +137,7 @@ then
 	sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-grep "PATH" ~/.zshrc|grep "HOME/bin" |grep -v '#'
+grep "PATH" ~/.zshrc|grep "HOME/bin" |grep -v '#' >$DEV_NULL
 home_bin_path_exists=$?
 
 if [ "${home_bin_path_exists}" == "$no" ]
@@ -78,7 +149,22 @@ fi
 
 command="/Users/anshup/bin/downloads_organizer"
 job='3 * * * *  '$command
-crontab -l |grep $command >/dev/null
+MAILTO='MAILTO=""'
+crontab -l|grep $MAILTO >$DEV_NULL
+mailto_exists=$?
+crontab -l|grep "[a..z]" >$DEV_NULL
+crontab_exists=$?
+if [[ $mailto_exists == $no ]]
+then
+	if [[ $crontab_exists == $no ]]
+	then
+		cat <(echo "$MAILTO") | crontab -
+	else
+		cat <(echo "$MAILTO"<(crontab -l)) | crontab -
+	fi
+fi
+
+crontab -l |grep $command >$DEV_NULL
 cron_exists=$?
 if [[ $cron_exists == $no ]]
 then
@@ -86,4 +172,9 @@ then
 	echo "add cron in preferences -> full disk access"
 fi
 
-pip3 install virtualenv
+which virtualenv >$DEV_NULL
+venv_exists=$?
+if [[ $venv_exists == $no ]]
+then
+		pip3 install virtualenv
+fi

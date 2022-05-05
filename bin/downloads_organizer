@@ -34,5 +34,5 @@ fi
 cd ~/Desktop
 if [[ `ls|grep Screen|wc -l ` -gt 0 ]]
 then
-mv -v Screen* screenshots/
+mv -v Screen* ~/tmp/screenshots/
 fi
