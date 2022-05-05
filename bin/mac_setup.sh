@@ -128,7 +128,7 @@ then
 	git clone https://github.com/anshprat/myfiles.git
 	cd myfiles
 	git remote remove origin
-	git remote add origin ssh://git@github.com:anshprat/myfiles.git
+	git remote add origin git@github.com:anshprat/myfiles.git
 	ln -s ~/code/anshprat/myfiles/bin ~/bin
 fi
 
