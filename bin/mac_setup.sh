@@ -76,7 +76,8 @@ jq \
 authy \
 terminal-notifier \
 skitch \
-unlox
+unlox \
+whatsapp
 
 do
 	check_brew_install $pkg
