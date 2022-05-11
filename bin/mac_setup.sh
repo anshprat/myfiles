@@ -77,7 +77,9 @@ authy \
 terminal-notifier \
 skitch \
 unlox \
-whatsapp
+whatsapp \
+gimp \
+dropbox
 
 do
 	check_brew_install $pkg
@@ -151,7 +153,7 @@ then
 fi
 
 
-command="/Users/anshup/bin/downloads_organizer"
+command="$HOME/bin/downloads_organizer"
 job='3 * * * *  '$command
 MAILTO='MAILTO=""'
 crontab -l|grep $MAILTO >$DEV_NULL
