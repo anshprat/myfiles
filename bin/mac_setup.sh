@@ -66,7 +66,6 @@ do_brew_install() {
 
 for pkg in curl \
 keybase \
-atom \
 postman \
 imagemagick \
 bitwarden \
@@ -79,7 +78,11 @@ skitch \
 unlox \
 whatsapp \
 gimp \
-dropbox
+dropbox \
+microsoft-teams \
+adobe-acrobat-reader \
+telegram \
+signal
 
 do
 	check_brew_install $pkg
@@ -91,7 +94,8 @@ unset pkgs_to_install
 
 for pkg in firefox \
 docker \
-amazon-chime
+amazon-chime \
+visual-studio-code
 do
 	check_brew_install $pkg
 done
