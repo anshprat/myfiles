@@ -2,7 +2,7 @@
 set +x
 ## /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/anshprat/myfiles/master/bin/mac_setup.sh)"
 
-echo "update timestamp_timeout (value is in minutes) using sudo visudo"
+echo "update timestamp_timeout (value is in minutes) using sudo visudo to avoid entering sudo password continuously"
 
 #TODO - check for above value in visudo and proceed accordingly
 DEV_NULL=/dev/null
@@ -82,7 +82,10 @@ dropbox \
 microsoft-teams \
 adobe-acrobat-reader \
 telegram \
-signal
+signal \
+ansible \
+qemu \
+lima 
 
 do
 	check_brew_install $pkg
@@ -92,8 +95,8 @@ do_brew_install $pkgs_to_install
 
 unset pkgs_to_install
 
+
 for pkg in firefox \
-docker \
 amazon-chime \
 visual-studio-code
 do
@@ -147,15 +150,13 @@ then
 	sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-grep "PATH" ~/.zshrc|grep "HOME/bin" |grep -v '#' >$DEV_NULL
-home_bin_path_exists=$?
-
-if [ "${home_bin_path_exists}" == "$no" ]
+if [ ! -f ~/.oh-my-zsh/custom/custom.zsh ] && [ ! -h ~/.oh-my-zsh/custom/custom.zsh ]
 then
-	echo "Adding \$HOME/bin to \$PATH"
-	echo "export PATH=\$HOME/bin:\$PATH">>~/.zshrc
+	CUSTOM_SRC="$HOME/code/anshprat/myfiles/zshrc" 
+	CUSTOM_DEST="$HOME/.oh-my-zsh/custom/custom.zsh"
+	echo "adding symlink $CUSTOM_SRC to $CUSTOM_DEST"
+	ln -s $CUSTOM_SRC $CUSTOM_DEST
 fi
-
 
 command="$HOME/bin/downloads_organizer"
 job='3 * * * *  '$command
@@ -188,3 +189,5 @@ if [[ $venv_exists == $no ]]
 then
 		pip3 install virtualenv
 fi
+
+echo "see https://gist.github.com/anshprat/3713bd1bbbf8123e347a8de29a07257e for lima/nerdctl/vde install"
