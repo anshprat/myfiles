@@ -85,7 +85,8 @@ telegram \
 signal \
 ansible \
 qemu \
-lima 
+lima \
+xbar
 
 do
 	check_brew_install $pkg
