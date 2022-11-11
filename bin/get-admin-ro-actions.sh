@@ -26,7 +26,7 @@ sort | uniq >${ACTIONS_FILE}
 # cat ${ACTIONS_FILE} | cut -f 2 -d ':'|grep -oE '^[A-Z][a-z]+'|sort|uniq
 
 # Manually curated verbs
-for v in Assume Check Count Decrypt Discover Domain Download Evaluate Get List Lookup Monitor Preview Read Render Report Sample Scan Search Select Test Verify View 
+for v in Assume Access Check Count Decrypt Discover Domain Download Evaluate Get List Lookup Monitor Preview Read Render Report Sample Scan Search Select Test Verify View 
 
 do
     grep ":$v" ${ACTIONS_FILE}

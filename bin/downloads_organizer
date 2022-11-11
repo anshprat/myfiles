@@ -15,7 +15,8 @@ cnm() {
 month=`date +%m`
 year=`date +%Y`
 
-basedir="$basedir/all/$year/$month"
+folderpath="$year/$month"
+basedir="$basedir/all/$folderpath"
 
 cnm
 
@@ -32,8 +33,17 @@ then
   ln -s `date +%F` dailydownload
 fi
 
+## Screenshots management
+
 cd ~/Desktop
+basedir="$HOME/tmp/screenshots/"
+basedir="$basedir/all/$folderpath"
+
+
 if [[ `ls|grep Screen|wc -l ` -gt 0 ]]
 then
-mv -v Screen* ~/tmp/screenshots/
+  today=`date +%F`
+  basedir=$basedir/$today
+  cnm
+  mv -v Screen* $basedir
 fi

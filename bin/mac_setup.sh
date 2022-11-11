@@ -64,6 +64,13 @@ do_brew_install() {
 	fi
 }
 
+#TODO check and install taps
+# hashicorp/tap
+# homebrew/cask
+# homebrew/core
+# homebrew/services
+# jakehilborn/jakehilborn
+
 for pkg in curl \
 keybase \
 postman \
@@ -86,7 +93,9 @@ signal \
 ansible \
 qemu \
 lima \
-xbar
+xbar \
+wget \
+displayplacer
 
 do
 	check_brew_install $pkg
@@ -99,7 +108,9 @@ unset pkgs_to_install
 
 for pkg in firefox \
 amazon-chime \
-visual-studio-code
+visual-studio-code \
+flux \
+docker
 do
 	check_brew_install $pkg
 done

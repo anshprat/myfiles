@@ -1,1 +1,1 @@
-lima nerdctl $@
+docker.podman

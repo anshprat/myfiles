@@ -1,0 +1,26 @@
+function vpnconnect {
+	# retrieving password
+	#local PASS_PATH='op://Grab/Jumpcloud/password'
+	local BW_SESSION=$(security find-generic-password -s bitwarden -w)
+    local PASS=$(bw get password "01_grab jumpcloud" --session $BW_SESSION)
+	if [ -z "$PASS" ]
+	then
+		echo 'signin in password manager ...'
+#		eval $(op signin)
+#		PASS=$(op read $PASS_PATH)
+	fi
+
+	if [ -z "$PASS" ]
+	then
+		echo 'password retrieval failed'
+		exit 1
+	fi
+
+	# connecting vpn
+	local HOST=GRAB-VPN
+	local GROUP=Remote_Access_VPN
+	local USER=anshu.prateek
+	printf "%s\n%s\n%s" $GROUP $USER $PASS | /opt/cisco/anyconnect/bin/vpn -s connect $HOST
+}
+
+vpnconnect
