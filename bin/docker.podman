@@ -1,6 +1,6 @@
-args=$@
-MOUNT_BASE=/var/vmhost
-HOME_BASE=$(echo $HOME|sed 's/\//\\\//g')
-MOUNT_BASE_ESC=$(echo $MOUNT_BASE|sed 's/\//\\\//g')
-args_mount=$(echo $args|sed -e "s/$HOME_BASE/$MOUNT_BASE_ESC/g")
-/opt/homebrew/bin/podman $args_mount
+#args=$@
+#MOUNT_BASE=/var/vmhost
+#HOME_BASE=$(echo $HOME|sed 's/\//\\\//g')
+#MOUNT_BASE_ESC=$(echo $MOUNT_BASE|sed 's/\//\\\//g')
+#args_mount=$(echo $args|sed -e "s/$HOME_BASE/$MOUNT_BASE_ESC/g")
+/opt/homebrew/bin/podman $@

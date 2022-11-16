@@ -1,4 +1,4 @@
-set -xe
+# set -xe
 function arrange_dual_screen() {
 	local EXT_SCREEN=`displayplacer list | grep -B2 "external screen" | sed -nr "s/Persistent screen id: ([A-Z0-9-]+)/\1/p"`
 	displayplacer "id:$EXT_SCREEN res:3840x2160 scaling:off origin:(-932,-2160) degree:0"
@@ -32,11 +32,3 @@ then
     fi
     displayplacer  "id:${id1} res:3840x2160 hz:60 color_depth:4 scaling:off origin:(-2978,-2160) degree:0" "id:${id2} res:3840x2160 hz:60 color_depth:4 scaling:off origin:(862,-2160) degree:0"
 fi
-    
-
-
-
-
-
-
-
