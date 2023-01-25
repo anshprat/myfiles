@@ -1,0 +1,37 @@
+#!/usr/bin/expect
+set GROUP [lindex $argv 0];
+log_user 0
+set timeout -1
+set lineterminationChar "\r"
+
+proc capture_output {lineterminationChar} {
+    expect   {
+                $lineterminationChar   { append OUTPUT $expect_out(buffer);exp_continue}      
+                eof                    { append OUTPUT $expect_out(buffer)}
+            }
+    return $OUTPUT
+}
+
+spawn sudo security find-generic-password -s bitwarden -w
+
+set BW_SESSION [capture_output $lineterminationChar]
+
+spawn bw get password "01_grab jumpcloud" --session $BW_SESSION
+
+set JC_SECRET [capture_output $lineterminationChar]
+
+set HOST GRAB-VPN
+
+spawn bw get username "01_grab jumpcloud" --session $BW_SESSION
+
+set USER [capture_output $lineterminationChar]
+
+spawn /opt/cisco/anyconnect/bin/vpn -s connect $HOST 
+expect -regexp {Group: \[([^]]+)\]}
+send "$GROUP\r"
+expect -regexp {Username: \[([^]]+)\]}
+send "$USER\r"
+expect "Password:"
+send "$JC_SECRET\r"
+expect ">> state: Connected"
+
