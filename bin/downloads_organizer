@@ -12,8 +12,22 @@ cnm() {
 
 }
 
-month=`date +%m`
-year=`date +%Y`
+date_day=`date +%d`
+if [ $date_day == "01" ] 
+then
+  month=`date -v-1d +%m`
+else
+  month=`date +%m`
+fi
+
+date_month=`date +%m`
+
+if  ([ $date_day == "01" ] && [ $date_month == "01" ] ) 
+then
+    year=year=`date -v-1d +%Y`
+else
+    year=`date +%Y`
+fi
 
 folderpath="$year/$month"
 basedir="$basedir/all/$folderpath"
@@ -35,6 +49,11 @@ fi
 
 ## Screenshots management
 
+#month and year need to be set to today for 01 and 01/01 scenarios set to yday above
+month=`date +%m`
+year=`date +%Y`
+folderpath="$year/$month"
+
 cd ~/Desktop
 basedir="$HOME/tmp/screenshots/"
 basedir="$basedir/all/$folderpath"
@@ -47,3 +66,11 @@ then
   cnm
   mv -v Screen* $basedir
 fi
+
+## brew upgrade
+hour=`date +%H`
+
+if [[ $hour -eq 15 ]]
+then
+  brew upgrade
+  fi

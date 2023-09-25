@@ -21,11 +21,13 @@ then
   sed_opts="-i .bak -E"
   sed ${sed_opts} '/\['"${profile}"'\]/{N;N;N;d;}' ${creds_file}
 
-  echo "[${profile}]
+  echo "
+[${profile}]
 aws_access_key_id = ${2}
 aws_secret_access_key = ${3}
 aws_session_token = ${4}" >> ${creds_file}
+
 exit $?
 fi
 
-aws-okta exec ${profile} -- /bin/bash -c "`basename $0` ${profile} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} ${AWS_SESSION_TOKEN}"
+# aws-okta exec ${profile} -- /bin/bash -c "`basename $0` ${profile} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} ${AWS_SESSION_TOKEN}"

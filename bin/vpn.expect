@@ -1,37 +1,71 @@
 #!/usr/bin/expect
-set GROUP [lindex $argv 0];
-log_user 0
+set argv [lassign $argv GROUP log_user]
+
+if {$log_user eq ""} {set log_user 0}
+if {$GROUP eq ""} {set GROUP 3}
+
+exp_internal 0
+log_user $log_user
+log_file /Users/anshup/tmp/vpn.expect.log
 set timeout -1
+
+set env(PATH) "/opt/homebrew/opt/mysql-client/bin:/Users/anshup/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+
 set lineterminationChar "\r"
+
+# spawn echo $PATH
+# spawn which node
+
+proc notify {message} {
+    spawn /opt/homebrew/bin/terminal-notifier -title 'Cisco AnyConnect via XBar' -subtitle 'Easy Connect' -group com.anshuprateek.vpn.notify -ignoreDnD -message $message -sender com.job.net
+}
 
 proc capture_output {lineterminationChar} {
     expect   {
-                $lineterminationChar   { append OUTPUT $expect_out(buffer);exp_continue}      
+                $lineterminationChar   { append OUTPUT $expect_out(buffer);exp_continue}
                 eof                    { append OUTPUT $expect_out(buffer)}
+                "Password:" {
+                    set message "failed to capture biometrics"
+                    # notify $message
+                    exit 181
+                }
             }
     return $OUTPUT
 }
 
-spawn sudo security find-generic-password -s bitwarden -w
+spawn security find-generic-password -s bitwarden -w
 
 set BW_SESSION [capture_output $lineterminationChar]
 
-spawn bw get password "01_grab jumpcloud" --session $BW_SESSION
+spawn /opt/homebrew/bin/bw get password "01grabjumpcloud" --session $BW_SESSION
 
 set JC_SECRET [capture_output $lineterminationChar]
 
+set JC_SECRET [string map {\n {} \r {} } $JC_SECRET]
+
 set HOST GRAB-VPN
 
-spawn bw get username "01_grab jumpcloud" --session $BW_SESSION
+spawn /opt/homebrew/bin/bw get username "01grabjumpcloud" --session $BW_SESSION
 
 set USER [capture_output $lineterminationChar]
 
+# spawn echo $USER
+
+# set GROUP [lindex $argv 0];
+
+# spawn /usr/bin/osascript -e "set T to text returned of (display dialog  \"\" with title \"TOTP\" buttons {\"Cancel\", \"OK\"} default button \"OK\" default answer \"\")"
+spawn /Users/anshup/bin/authy_jc.sh -v
+
+set TOTP [capture_output $lineterminationChar]
+
+# spawn echo -n $GROUP $USER $JC_SECRET $TOTP
 spawn /opt/cisco/anyconnect/bin/vpn -s connect $HOST 
 expect -regexp {Group: \[([^]]+)\]}
 send "$GROUP\r"
 expect -regexp {Username: \[([^]]+)\]}
 send "$USER\r"
 expect "Password:"
-send "$JC_SECRET\r"
+send "$JC_SECRET,$TOTP\r"
 expect ">> state: Connected"
+spawn sleep 1 && /usr/bin/open xbar://app.xbarapp.com/refreshAllPlugins
 

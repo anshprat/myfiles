@@ -1,6 +1,10 @@
 #!/bin/bash
+TERRAFORM01115=/Users/anshup/bin/gitignore.d/terraform01115
+TERRAFORM01231=/Users/anshup/bin/gitignore.d/terraform01231
+TERRAFORM0132=/Users/anshup/bin/gitignore.d/terraform0132
+TERRAFORM105=/Users/anshup/bin/gitignore.d/terraform105
+TERRAFORM=$TERRAFORM105
 
-TERRAFORM01115=/Users/anshup/bin/gitignore.d/terraform
-TERRAFORM=$TERRAFORM01115
 find ~/.aws/credentials -mmin +45 -exec ~/bin/save_aws_creds \;
+
 $TERRAFORM $@

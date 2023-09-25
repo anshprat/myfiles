@@ -95,7 +95,12 @@ qemu \
 lima \
 xbar \
 wget \
-displayplacer
+displayplacer \
+terminal-notifier \
+podman-desktop \
+aws-iam-authenticator \
+lens \
+k9s \
 
 do
 	check_brew_install $pkg
@@ -202,4 +207,4 @@ then
 		pip3 install virtualenv
 fi
 
-echo "see https://gist.github.com/anshprat/3713bd1bbbf8123e347a8de29a07257e for lima/nerdctl/vde install"
+# echo "see https://gist.github.com/anshprat/3713bd1bbbf8123e347a8de29a07257e for lima/nerdctl/vde install"
