@@ -8,6 +8,7 @@ import threading
 from secretsdata import *
 import sys
 import argparse
+import copy
 
 userfile = "users.txt"
 
@@ -43,7 +44,8 @@ override_run_date = False
 terraform_repos = [4755]
 cache_file_extension = ".p"
 other_events = {}
-global_other_events = {}
+global_other_events = dict({'accepted': {'MergeRequest': 0}, 'approved': {'MergeRequest': 0}, 'closed': {'MergeRequest': 0}, 'commented on': {
+    'DiffNote': 0, 'Note': 0, 'DiscussionNote': 0}, 'created': {None: 0}, 'deleted': {None: 0}, 'joined': {None: 0}, 'left': {None: 0}, 'opened': {'MergeRequest': 0, 'Issue': 0}})
 user_stats = {}
 print_user_stats = False
 
@@ -92,6 +94,7 @@ def reset_dict_to_zero(d):
             # Set the value to zero
             d[key] = 0
 
+
 def get_values_in_order(d):
     values = []
 
@@ -102,18 +105,6 @@ def get_values_in_order(d):
             values.append(value)
 
     return values
-
-# Example usage:
-my_dict = {
-    'a': {
-        'b': {
-            'c': 1,
-            'd': 2
-        },
-        'e': 3
-    },
-    'f': 4
-}
 
 
 def get_data(url, headers, cache, params="", return_response=False):
@@ -137,7 +128,6 @@ def get_data(url, headers, cache, params="", return_response=False):
 
 
 def get_events(events_url, headers, params, events_cache, username, stats_commits=0, stats_add=0, stats_del=0, stats_total=0):
-    print("get_events_called")
     orig_username = username
     username, git_username = get_usernames(username)
     events_response = get_data(events_url, headers, events_cache, params, True)
@@ -231,22 +221,13 @@ def get_events(events_url, headers, params, events_cache, username, stats_commit
 
     else:
         stats = f"{username}\t{stats_commits}\t{stats_add}\t{stats_del}\t{stats_total}\t"
-        # print(other_events)
         user_stats.update({username: {"c": stats_commits, "a": stats_add,
-                          "d": stats_del, "t": stats_total, "o": other_events.copy()}})
-        
-        # print(user_stats,"\n\n")
-        # print(len(user_stats))
-        if print_user_stats:
-            print(user_stats)
-            print(stats, other_events)
-            
-        # print(stats)
-        # pprint.pprint(other_events)
-        # print()
-        global global_other_events
-        global_other_events = merge_dicts(global_other_events, other_events)
-        # user_other_events_store.update({username:other_events.copy()})
+                          "d": stats_del, "t": stats_total, "o": copy.deepcopy(other_events)}})
+
+        # global global_other_events
+        reset_dict_to_zero(other_events)
+        # print(type(global_other_events))
+        # global_other_events.update(copy.deepcopy(other_events))
         other_events.clear()
         output_fh = open(output_file, 'a')
         output_fh.write(stats+"\n")
@@ -254,7 +235,7 @@ def get_events(events_url, headers, params, events_cache, username, stats_commit
         if print_user_stats:
             print(user_stats)
             print(stats, other_events)
-        print(user_stats)
+        # print(user_stats)
 
 
 def get_user_details(username):
@@ -379,44 +360,26 @@ else:
         get_user_details(username)
 output_fh.close()
 
-# # print(global_other_events)
-# # pprint.pprint(user_other_events_store)
-# # pprint.pprint(user_stats)
 
-# reset_dict_to_zero(global_other_events)
-# # print(global_other_events)
-# sorted_goe = {k: v for k, v in sorted(global_other_events.items())}
-# # print(sorted_goe)
+# print(global_other_events)
+sorted_goe = {k: v for k, v in sorted(global_other_events.items())}
+print('[name,c,a,d,t,', sorted_goe, ']')
+# print(sorted_goe)
+for user in user_stats:
+    sorted_goe = {k: v for k, v in sorted(global_other_events.items())}
 
-print(user_stats)
+    reset_dict_to_zero(sorted_goe)
 
+    user_stats[user]["o"] = merge_dicts(sorted_goe,user_stats[user]["o"])
 
-# for user in user_stats:
-#     print(user_stats)
-    # print(user)
-    # print(sorted_goe)
-    # print(user_stats[user]["o"])
-    # user_stats[user]["o"] = sorted_goe.update(user_stats[user]["o"])
-    # user_data = user_stats[user]["o"]
-    # print(sorted_goe)
-    # print(user_stats[user]["o"])
-    
-    
-    # print(sorted_goe)
-    # user_stats[user].pop("o")
-    # sorted_user_data = {k: v for k, v in sorted(user_data.items())}
-    # user_stats[user].update(sorted_user_data)
-    # print(user, ",", user_stats[user])
-    # tmp_user_stats = []
-    # tmp_user_stats.append(user)
-    # for _,v in user_stats[user]:
-    #     tmp_user_stats.append(v)
+    tmp_user_stats = []
+    tmp_user_stats.append(user)
 
-    # o_stats = get_values_in_order(sorted_user_data)
+    o = copy.deepcopy(user_stats[user]["o"])
+    user_stats[user].pop("o")
 
-    # for v in o_stats:
-    #  tmp_user_stats.append(v)
-    
-    # reset_dict_to_zero(sorted_goe)
+    for k in user_stats[user]:
+        tmp_user_stats.append(user_stats[user][k])
 
-    # print(tmp_user_stats)
+    tmp_user_stats.extend(get_values_in_order(o))
+    print(tmp_user_stats)
