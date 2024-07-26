@@ -71,11 +71,12 @@ do_brew_install() {
 # homebrew/services
 # jakehilborn/jakehilborn
 
+#PP removed keybase
+# bitwarden to be installed via app store for touch
+
 for pkg in curl \
-keybase \
 postman \
 imagemagick \
-bitwarden \
 1clipboard \
 awscli \
 jq \
@@ -101,6 +102,8 @@ podman-desktop \
 aws-iam-authenticator \
 lens \
 k9s \
+certbot \
+pipx \
 
 do
 	check_brew_install $pkg
@@ -139,7 +142,7 @@ then
 	open "https://apps.apple.com/sg/app/speedtest-by-ookla/id1153157709?mt=12"
 fi
 
-mkdir -p ~/code/{grab,anshprat,others}
+mkdir -p ~/code/{phonepe,anshprat,others}
 
 cd ~/code/anshprat
 
@@ -204,7 +207,7 @@ which virtualenv >$DEV_NULL
 venv_exists=$?
 if [[ $venv_exists == $no ]]
 then
-		pip3 install virtualenv
+		pipx install virtualenv
 fi
 
 # echo "see https://gist.github.com/anshprat/3713bd1bbbf8123e347a8de29a07257e for lima/nerdctl/vde install"

@@ -1,8 +1,16 @@
 #!/bin/bash
+
 #0 * * * * /home/anshup/bin/downloads_organizer &>/dev/null
 #redirect all o/p to dev null to avoid sending out any emails
 set -x
+date
 basedir="$HOME/Downloads"
+today=$(date +%F)
+dailydownload="$basedir/dailydownload"
+
+yes=0
+no=1
+
 cd $basedir
 
 cnm() {
@@ -39,12 +47,32 @@ if [ $OSTYPE == "linux-gnu" ]
 then
   depthparam=" -maxdepth 1"
 fi
-if [ ! -d `date +%F` ]
-then
-  rm dailydownload
-  find . ${depthparam} -not -name 'all' -not -name '.*' -exec mv {} ${basedir} \;
-  mkdir `date +%F`
-  ln -s `date +%F` dailydownload
+
+
+# Check if dailydownload is a symlink and points to today's directory
+if [ ! -L "$dailydownload" ] || [ "$(readlink "$dailydownload")" != "$today" ]; then
+  # Remove the dailydownload symlink if it exists
+  if [ -L "$dailydownload" ]; then
+    rm "$dailydownload"
+    is_deleted=$?
+    
+    # Check if the symlink was successfully deleted
+    if [ $is_deleted -ne 0 ]; then
+      osascript -e 'display notification "Failed to delete dailydownload, check full disk access for cron and downloads_organizer" with title "Full disk access for cron"'
+      exit 1
+    fi
+  fi
+  
+  # Move files
+  find . ${depthparam} -not -name 'all' -not -name '.*' -exec mv {} "${basedir}" \;
+  
+  # Create today's directory if it doesn't exist
+  if [ ! -d "$today" ]; then
+    mkdir "$today"
+  fi
+  
+  # Create a new symlink to today's directory
+  ln -s "$today" "$dailydownload"
 fi
 
 ## Screenshots management
@@ -55,9 +83,17 @@ year=`date +%Y`
 folderpath="$year/$month"
 
 cd ~/Desktop
-basedir="$HOME/tmp/screenshots/"
-basedir="$basedir/all/$folderpath"
+base_screenshots="screenshots"
+ss_basedir="$HOME/tmp/$base_screenshots"
 
+basedir="$ss_basedir/all/$folderpath"
+
+desktop_symfolder="$HOME/Desktop/$base_screenshots"
+
+if [ ! -L $desktop_symfolder ]
+then
+  ln -s $ss_basedir $desktop_symfolder
+fi
 
 if [[ `ls|grep Screen|wc -l ` -gt 0 ]]
 then

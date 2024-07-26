@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 if [ $# -ge 1 ]
 then
@@ -6,5 +6,5 @@ then
 else
     arg="pbcopy"
 fi
-
-$GOPATH/bin/gauth|grep jumpcloud|awk '{print $3}'| $arg
+source $HOME/.zshrc
+$GOPATH/bin/gauth|grep anshu.prateek|awk '{print $3}'| eval ${arg}
