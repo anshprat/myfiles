@@ -104,6 +104,7 @@ lens \
 k9s \
 certbot \
 pipx \
+secretive \
 
 do
 	check_brew_install $pkg
@@ -162,6 +163,10 @@ then
 	cd myfiles
 	git remote remove origin
 	git remote add origin git@github.com:anshprat/myfiles.git
+fi
+
+if [ ! -L ~/bin ]
+then
 	ln -s ~/code/anshprat/myfiles/bin ~/bin
 fi
 
