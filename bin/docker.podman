@@ -1,10 +1,29 @@
+set +x
 #args=$@
 #MOUNT_BASE=/var/vmhost
 #HOME_BASE=$(echo $HOME|sed 's/\//\\\//g')
 #MOUNT_BASE_ESC=$(echo $MOUNT_BASE|sed 's/\//\\\//g')
 #args_mount=$(echo $args|sed -e "s/$HOME_BASE/$MOUNT_BASE_ESC/g")
-if [ $1 == "build" ] && [ $PWD == $HOME ]; then
+
+HOSTNAME_NEEDLE="PP-Disable"
+
+if [ "$1" == "build" ] && [ $PWD == $HOME ]; then
     echo "you mostly dont want to build in home directory; exitting"
     exit 432
 fi
+HOSTNAME_PREFIX=$(hostname|awk -F '-' '{print $1}')
+
+if [ "$1" = "pull" ] && [ "${HOSTNAME_PREFIX}" == "${HOSTNAME_NEEDLE}" ]; then
+    REPO_BASE="docker.phonepe.com"
+    IMAGE_NAME=$(echo "$@" | awk -F ' ' '{print $2}')
+    #Check if IMAGE_FIRST_NEEDLE contains a . in it, if so, we assume the image name is a DNS name and we need to use the full repo base.
+    IMAGE_FIRST_NEEDLE=$(echo "$IMAGE_NAME"|awk -F '/' '{print $1}')
+    if [[ $(echo "$IMAGE_FIRST_NEEDLE" | grep -E "\.") ]]; then
+        /opt/homebrew/bin/podman pull "${IMAGE_NAME}"
+        exit $?
+    else
+        docker pull "${REPO_BASE}/${IMAGE_NAME}"
+    fi
+fi
+
 /opt/homebrew/bin/podman $@

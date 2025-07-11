@@ -1,0 +1,1 @@
+curl -vvv -I -L https://mail.google.com/mail/ -w "@$HOME/code/anshprat/myfiles/bin/curl-format.txt" >> $HOME/tmp/logs/curl-time.log
