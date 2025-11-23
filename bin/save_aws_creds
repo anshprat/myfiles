@@ -23,7 +23,7 @@ for acc in identity ${account_suffix}dev ${account_suffix}prod ${account_suffix}
 do
 # /Users/anshup/bin/stsSaveTokens.sh ${acc} --account=${account_suffix}
 # aws sso login --profile dev
-rm -rvf /Users/anshup/.aws/cli/cache/*json
+rm -rvf $HOME/.aws/cli/cache/*json
 aws sts get-caller-identity --profile ${acc} --no-cli-pager
 rc=$?
 if [ $rc -eq 255 ]
@@ -33,7 +33,7 @@ then
   sleep 1
   aws sts get-caller-identity --profile ${acc} --no-cli-pager
 fi
-/Users/anshup/bin/stsSaveTokens.sh  ${acc} $(cat /Users/anshup/.aws/cli/cache/*json| jq '.Credentials.AccessKeyId','.Credentials.SecretAccessKey','.Credentials.SessionToken'|tr '\n' ' ')
+$HOME/bin/stsSaveTokens.sh  ${acc} $(cat $HOME/.aws/cli/cache/*json| jq '.Credentials.AccessKeyId','.Credentials.SecretAccessKey','.Credentials.SessionToken'|tr '\n' ' ')
 
 done
 #sed -i bak -e 's/\[identity\]/\[default\]/' ~/.aws/credentials

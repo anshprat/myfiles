@@ -80,26 +80,16 @@ imagemagick \
 1clipboard \
 awscli \
 jq \
-authy \
 terminal-notifier \
-skitch \
 unlox \
 whatsapp \
 gimp \
 dropbox \
-microsoft-teams \
 adobe-acrobat-reader \
 telegram \
-signal \
-ansible \
-qemu \
-lima \
-xbar \
 wget \
 displayplacer \
 terminal-notifier \
-podman-desktop \
-aws-iam-authenticator \
 lens \
 k9s \
 certbot \
@@ -114,12 +104,12 @@ do_brew_install $pkgs_to_install
 
 unset pkgs_to_install
 
-
+# amazon-chime flux
 for pkg in firefox \
-amazon-chime \
 visual-studio-code \
-flux \
-docker
+docker \
+ollama \
+xbar
 do
 	check_brew_install $pkg
 done
@@ -143,7 +133,7 @@ then
 	open "https://apps.apple.com/sg/app/speedtest-by-ookla/id1153157709?mt=12"
 fi
 
-mkdir -p ~/code/{phonepe,anshprat,others}
+mkdir -p ~/code/{anshprat,others}
 
 cd ~/code/anshprat
 
@@ -156,6 +146,8 @@ then
 	chmod 400 ~/.ssh/*
 	cd -
 fi
+
+cd ~/code/anshprat
 
 if [ ! -d myfiles ]
 then

@@ -1,0 +1,28 @@
+POD_NAME=""
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -p)
+      POD_NAME="$2"
+      shift 2
+      ;;
+    -n)
+      NAMESPACE="$2"
+      shift 2
+      ;;
+    *)
+      # If no -n flag provided, use positional argument as before
+      if [[ -z "$NAMESPACE" ]]; then
+        NAMESPACE="$1"
+      fi
+      shift
+      if [[ -z "$POD_NAME" ]]; then
+        POD_NAME="$1"
+        shift
+        continue
+      fi
+
+      ;;
+  esac
+done
+
+kubectl exec -n $NAMESPACE --stdin --tty $POD_NAME -- /bin/bash

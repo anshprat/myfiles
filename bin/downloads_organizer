@@ -108,5 +108,5 @@ hour=`date +%H`
 
 if [[ $hour -eq 15 ]]
 then
-  brew upgrade
-  fi
+  /opt/homebrew/bin/brew upgrade
+fi

@@ -1,0 +1,60 @@
+#!/bin/bash
+# AWS SSO Session Validator
+# Checks if AWS SSO session is valid and renews if needed
+
+set -e
+
+# Configuration
+SSO_SESSION="wvrdz"
+DEFAULT_PROFILE="weaver-admin"
+PROFILE="${1:-$DEFAULT_PROFILE}"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+check_sso_session() {
+    local profile="$1"
+
+    # Try to get caller identity to check if session is valid
+    if aws sts get-caller-identity --profile "$profile" &>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+renew_sso_session() {
+    echo -e "${YELLOW}SSO session expired or invalid. Initiating login...${NC}"
+
+    # Use sso-session to refresh all profiles at once
+    aws sso login --sso-session "$SSO_SESSION"
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}SSO session refreshed successfully!${NC}"
+        return 0
+    else
+        echo -e "${RED}Failed to refresh SSO session${NC}"
+        return 1
+    fi
+}
+
+# Main logic
+if check_sso_session "$PROFILE"; then
+    echo -e "${GREEN}✓ SSO session is valid for profile: $PROFILE${NC}"
+
+    # Show current identity
+    IDENTITY=$(aws sts get-caller-identity --profile "$PROFILE" --output json)
+    ACCOUNT=$(echo "$IDENTITY" | grep -o '"Account": "[^"]*' | cut -d'"' -f4)
+    ARN=$(echo "$IDENTITY" | grep -o '"Arn": "[^"]*' | cut -d'"' -f4)
+
+    echo -e "Account: ${GREEN}$ACCOUNT${NC}"
+    echo -e "Identity: ${GREEN}$ARN${NC}"
+    exit 0
+else
+    echo -e "${RED}✗ SSO session is invalid or expired${NC}"
+    renew_sso_session
+    exit $?
+fi
