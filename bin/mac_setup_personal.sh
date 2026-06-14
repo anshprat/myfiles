@@ -111,7 +111,7 @@ PERSONAL_CASKS=(
   shottr                         # screenshots (pairs with ~/Desktop/screenshots)
   caffeine hiddenbar stats rectangle xbar   # menubar / window utilities
   adobe-acrobat-reader gimp postman
-  claude-code chatgpt            # AI tools (Claude Code CLI + ChatGPT)
+  chatgpt                        # ChatGPT (Claude Code installed via script below)
 )
 for cask in "${PERSONAL_CASKS[@]}"; do
   brew_install_cask "$cask" || note_fail "brew install --cask $cask failed"
@@ -121,10 +121,20 @@ done
 # the cask doesn't, so keep installing it from the App Store.
 appstore_if_missing "Bitwarden.app" "https://apps.apple.com/sg/app/bitwarden/id1352778147?mt=12"
 
-# No Homebrew cask (or App Store build) exists for these — open the official
-# download page if the app isn't already installed.
+# Proton Authenticator ships on the Mac App Store; Perplexity has no cask or
+# App Store build, so open its download page if it isn't installed.
+appstore_if_missing "Proton Authenticator.app" "https://apps.apple.com/us/app/proton-authenticator/id6741758667"
 download_if_missing "Perplexity.app" "https://www.perplexity.ai/"
-download_if_missing "Proton Authenticator.app" "https://proton.me/authenticator"
+
+# Claude Code — installed via the official install script (the currently
+# recommended method), not Homebrew. Skips if `claude` is already on PATH
+# (e.g. an existing npm/nvm install).
+if has claude; then
+  info "Claude Code already installed ($(claude --version 2>/dev/null | head -1))"
+else
+  info "Installing Claude Code (https://claude.ai/install.sh)"
+  curl -fsSL https://claude.ai/install.sh | bash || note_fail "Claude Code install failed"
+fi
 
 xcode-select --install 2>/dev/null \
   || info 'Command line tools already installed (use "Software Update" for updates).'
