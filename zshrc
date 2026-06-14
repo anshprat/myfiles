@@ -3,15 +3,20 @@ export GOPATH=$HOME/code/go
 export CODE_PATH="$HOME/code"
 export CODE="$HOME/code"
 alias c="cd $HOME/code"
-alias tfd="cd $HOME/code/$COMPANY/infra-tf"
+alias tfd="cd $HOME/code/$COMPANY/infra/infra-tf"
 alias tmp="cd $HOME/tmp"
 alias others="cd $HOME/code/others"
 alias wd="cd $HOME/code/$COMPANY"
 # Set GNU Screen window title to the basename of $PWD
 set_screen_title() { printf '\ek%s\e\\' "${PWD:t}"; }
 export G="git@github.com:"
-chpwd()  { set_screen_title; }
-precmd() { set_screen_title; }
+# chpwd()  {
+#   set_screen_title;
+#   if [[ "$PWD" == "$CODE/$COMPANY"* ]]; then
+#     export DOPPLER_TOKEN=$(doppler configure get token --plain)
+#   fi
+# }
+# precmd() { set_screen_title; }
 #Gcloud bin to path for kubectl etc
 export PATH="/opt/homebrew/share/google-cloud-sdk/bin:$PATH"
 export SSH_AUTH_SOCK=/Users/anshuprateek/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh
@@ -39,3 +44,15 @@ export AWS_PAGER=""
 [[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
 
 export GH_PAGER=""
+
+alias gclogin="gcloud auth login"
+
+export CLAUDE_CODE_CONFIG=/Users/anshuprateek/code/anshprat/claude-billing/claude-code-config.json
+
+alias kustomiz="kustomize"
+
+alias pip="pip3"
+
+alias pt="pwd | pbcopy && open -a Terminal ."
+
+alias pc="pwd | pbcopy"
