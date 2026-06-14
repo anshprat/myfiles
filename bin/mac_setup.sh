@@ -1,6 +1,11 @@
 #!/bin/bash
 set +x
 ## /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/anshprat/myfiles/master/bin/mac_setup.sh)"
+##
+## DEPRECATED: superseded by the split setup —
+##   bin/mac_setup_personal.sh  (every laptop: identity + apps)
+##   bin/mac_setup_work.sh      (work laptop: cloud/k8s/IaC + runtimes)
+## Kept temporarily for reference; remove once the split is validated.
 
 echo "update timestamp_timeout (value is in minutes) using sudo visudo to avoid entering sudo password continuously"
 
