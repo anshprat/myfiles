@@ -1,0 +1,8 @@
+dbs () {
+  local container_name=$(docker ps --format '{{.Names}}' | grep 'wd-pg$')
+  if [ -z "$container_name" ]; then
+      echo "Error: Could not find a running container ending with 'wd-pg'"
+      return 1
+  fi
+  docker exec -it "$container_name" psql -U pguser -d "$1"
+}

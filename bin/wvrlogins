@@ -1,0 +1,8 @@
+gcloud auth login 
+sleep 1
+gcloud auth application-default login 
+sleep 1
+aws sso login --sso-session wvrdz 
+sleep 1
+export DOPPLER_TOKEN=$(doppler configure get token --plain)
+argocd login argocd.main.dev.wvrdz.com --sso  --grpc-web

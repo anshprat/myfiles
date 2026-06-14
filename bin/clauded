@@ -1,1 +1,6 @@
-claude --allow-dangerously-skip-permissions $@
+claude \
+--dangerously-skip-permissions \
+-n  $(basename `pwd`) \
+--remote-control \
+--effort xhigh  \
+$@

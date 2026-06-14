@@ -1,0 +1,32 @@
+#!/bin/zsh
+
+#set -x 
+
+_self=$(basename $0)
+
+_env=$(echo $_self | cut -b 2-)
+
+
+source $HOME/bash-alias-scripts/setcluster.sh
+
+
+# Map environment to cluster name
+declare -A cluster_map
+cluster_map=(
+  ["dev"]="dev2-k8s-main"
+  ["uat"]="uat2-k8s-main"
+  ["prod"]="prod1-k8s-main-us-1"
+)
+
+# Get the cluster name for the environment
+cluster_name="${cluster_map[$_env]}"
+
+if [[ -n "$cluster_name" ]]; then
+  setcluster "$cluster_name"
+else
+  echo "Error: Unknown environment '$_env'"
+  echo "Available: ${(k)cluster_map[@]}"
+  exit 1
+fi
+
+export DOPPLER_TOKEN=$(doppler configure get token --plain)

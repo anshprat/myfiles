@@ -1,0 +1,3 @@
+open https://github.com/wvrdz/loom/actions
+open "https://github.com/wvrdz/loom/pulls?q=sort%3Aupdated-desc+is%3Apr+is%3Aopen"
+open "https://github.com/wvrdz/loom/pulls?q=sort%3Aupdated-desc+is%3Apr+is%3Aclosed"

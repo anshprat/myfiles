@@ -1,0 +1,16 @@
+#!/opt/homebrew/bin/bash
+
+declare -A git_command
+
+git_command=(["co"]="checkout" ["s"]="status" ["d"]="diff" ["amend"]="commit --amend" ["force"]="push --force" ["c"]="commit" ["b"]="branch" \
+["r"]="remote")
+#git_command=(["key"]="value")
+
+cmd1=$1
+if [ ${#git_command[$cmd1]} -gt 0 ]
+then
+  shift 
+  git ${git_command[$cmd1]} $@
+else
+  git $@
+fi

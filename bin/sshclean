@@ -1,3 +1,5 @@
 #!/bin/bash
 set -x
-sed -i .backup  ${1}d ~/.ssh/known_hosts 
+host="$1"
+ssh-keygen -R ${host}
+sed -i .backup  "/${host}/d" ~/.ssh/known_hosts 2>/dev/null || true

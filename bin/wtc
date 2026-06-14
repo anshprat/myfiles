@@ -1,0 +1,2 @@
+git fetch origin main:main
+wt create --non-interactive --worktree-open default --worktree-name $1

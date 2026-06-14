@@ -32,7 +32,7 @@ date_month=`date +%m`
 
 if  ([ $date_day == "01" ] && [ $date_month == "01" ] ) 
 then
-    year=year=`date -v-1d +%Y`
+    year=`date -v-1d +%Y`
 else
     year=`date +%Y`
 fi
