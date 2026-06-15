@@ -56,3 +56,40 @@ alias pip="pip3"
 alias pt="pwd | pbcopy && open -a Terminal ."
 
 alias pc="pwd | pbcopy"
+
+
+for git_overload in gco gr gcl; do
+#   if ! command -v $git_overload >/dev/null 2>&1; then
+    alias $git_overload="cmd=$git_overload $HOME/bin/git.overload.sh"
+#   fi
+done
+
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/anshuprateek/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
+
+# # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+# [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Added by Antigravity
+# export PATH="/Users/anshuprateek/.antigravity/antigravity/bin:$PATH"
+
+# Brew upgrade logging - logs all upgrades to ~/tmp/var/log/brew-upgrades.log
+source "$HOME/tmp/var/log/brew-upgrade-logger.sh"
+alias brew-upgrade='brew_upgrade_logged'
+
+# AI Center - Multi-Agent Communication System
+export PATH="${HOME}/.ai-center/bin:${PATH}"
+
+# pnpm
+export PNPM_HOME="$HOME/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# Team AI - Multi-Agent Communication System
+export PATH="${HOME}/.team-ai/bin:${PATH}"
