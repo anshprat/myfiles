@@ -103,18 +103,21 @@ done
 
 info "Step 5/8: GUI apps"
 PERSONAL_CASKS=(
-  google-chrome firefox          # browsers
-  1password                      # password manager (Bitwarden via App Store below for Touch ID)
-  slack dropbox telegram whatsapp   # comms / sync
-  obsidian notion                # notes
-  ghostty                        # terminal
-  visual-studio-code             # editor
-  secretive                      # SSH keys in the Secure Enclave
-  shottr                         # screenshots (pairs with ~/Desktop/screenshots)
-  caffeine hiddenbar stats rectangle xbar   # menubar / window utilities
-  adobe-acrobat-reader gimp postman
-  chatgpt                        # ChatGPT (Claude Code installed via script below)
-  ollama-app                     # local LLM runtime
+  google-chrome firefox tor-browser     # browsers
+  slack telegram whatsapp zoom          # comms (Bitwarden personal pw mgr via App Store below)
+  dropbox                               # sync
+  obsidian notion                       # notes
+  visual-studio-code beekeeper-studio   # editor / DB client
+  secretive yubico-authenticator        # SSH keys / security keys
+  shottr superwhisper                   # screenshots / dictation
+  caffeine hiddenbar stats rectangle xbar muzzle   # menubar / window utilities
+  gimp postman                          # graphics / API client
+  obs insta360-studio                   # streaming / 360 camera
+  shearwater-cloud                      # dive computer
+  vnc-viewer windows-app                # remote access
+  datadog-agent                         # monitoring
+  chatgpt claude                        # AI apps (Claude Code CLI installed below)
+  ollama-app                            # local LLM runtime
 )
 for cask in "${PERSONAL_CASKS[@]}"; do
   brew_install_cask "$cask" || note_fail "brew install --cask $cask failed"
@@ -138,6 +141,11 @@ else
   info "Installing Claude Code (https://claude.ai/install.sh)"
   curl -fsSL https://claude.ai/install.sh | bash || note_fail "Claude Code install failed"
 fi
+
+# The Docker install below calls sudo several times. Raising the sudo
+# timestamp_timeout (value in minutes) via `sudo visudo` avoids re-entering the
+# password repeatedly during this run.
+info "Tip: raise sudo timestamp_timeout via 'sudo visudo' (minutes) to avoid repeated password prompts during the Docker install."
 
 # Docker Desktop — installed the same way as loom's scripts/setup-dev-env.sh:
 # download the arch-appropriate dmg and install it headlessly (no Homebrew cask).

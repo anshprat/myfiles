@@ -118,6 +118,11 @@ info "Step 5/5: work GUI apps"
 WORK_CASKS=(
   gcloud-cli      # Google Cloud SDK (provides gcloud + a kubectl)
   lens            # Kubernetes IDE
+  1password       # password manager + Safari extension (work vault)
+  granola         # meeting notes
+  linear          # issue tracking
+  microsoft-teams # work comms
+  tailscale       # VPN / mesh networking
 )
 for cask in "${WORK_CASKS[@]}"; do
   brew_install_cask "$cask" || note_fail "brew install --cask $cask failed"
