@@ -107,6 +107,7 @@ PERSONAL_CASKS=(
   slack dropbox telegram whatsapp   # comms / sync
   obsidian notion                # notes
   ghostty                        # terminal
+  visual-studio-code             # editor
   secretive                      # SSH keys in the Secure Enclave
   shottr                         # screenshots (pairs with ~/Desktop/screenshots)
   caffeine hiddenbar stats rectangle xbar   # menubar / window utilities
