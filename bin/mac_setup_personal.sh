@@ -20,6 +20,7 @@ info() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33mWARN:\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31mERROR:\033[0m %s\n' "$*" >&2; exit 1; }
 has()  { command -v "$1" >/dev/null 2>&1; }
+docker_ready() { has docker && docker info >/dev/null 2>&1; }
 
 FAILED_COUNT=0
 FAILED_LIST=""
@@ -113,6 +114,7 @@ PERSONAL_CASKS=(
   caffeine hiddenbar stats rectangle xbar   # menubar / window utilities
   adobe-acrobat-reader gimp postman
   chatgpt                        # ChatGPT (Claude Code installed via script below)
+  ollama-app                     # local LLM runtime
 )
 for cask in "${PERSONAL_CASKS[@]}"; do
   brew_install_cask "$cask" || note_fail "brew install --cask $cask failed"
@@ -135,6 +137,38 @@ if has claude; then
 else
   info "Installing Claude Code (https://claude.ai/install.sh)"
   curl -fsSL https://claude.ai/install.sh | bash || note_fail "Claude Code install failed"
+fi
+
+# Docker Desktop — installed the same way as loom's scripts/setup-dev-env.sh:
+# download the arch-appropriate dmg and install it headlessly (no Homebrew cask).
+install_docker_macos() {
+  # Download URLs from https://docs.docker.com/desktop/install/mac-install/
+  local url dmg="$HOME/Downloads/Docker.dmg"
+  case "$(uname -m)" in
+    arm64) url="https://desktop.docker.com/mac/main/arm64/Docker.dmg" ;;
+    *)     url="https://desktop.docker.com/mac/main/amd64/Docker.dmg" ;;
+  esac
+  info "Downloading Docker Desktop: $url"
+  curl -fL --progress-bar -o "$dmg" "$url" || return 1
+  info "Installing Docker Desktop (sudo required; can take several minutes)"
+  sudo hdiutil attach "$dmg" || return 1
+  if ! sudo /Volumes/Docker/Docker.app/Contents/MacOS/install; then
+    sudo hdiutil detach /Volumes/Docker
+    return 1
+  fi
+  sudo hdiutil detach /Volumes/Docker
+  rm -f "$dmg"
+  open -a Docker
+  info "Waiting for the Docker daemon to start"
+  for _ in {1..30}; do
+    docker_ready && return 0
+    sleep 2
+  done
+  warn "Docker daemon not up yet; finish Docker Desktop's first-run setup."
+  return 0
+}
+if ! has docker; then
+  install_docker_macos || note_fail "Docker Desktop install failed"
 fi
 
 xcode-select --install 2>/dev/null \
