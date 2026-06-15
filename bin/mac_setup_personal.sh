@@ -104,7 +104,7 @@ info "Step 5/8: GUI apps"
 PERSONAL_CASKS=(
   google-chrome firefox          # browsers
   1password                      # password manager (Bitwarden via App Store below for Touch ID)
-  dropbox telegram whatsapp      # comms / sync
+  slack dropbox telegram whatsapp   # comms / sync
   obsidian notion                # notes
   ghostty                        # terminal
   secretive                      # SSH keys in the Secure Enclave
