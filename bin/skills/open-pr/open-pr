@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# open-pr: find the pull request for the branch checked out in a folder and open it in the browser.
+#
+# Usage: open-pr [DIR] [-u|--url] [-h|--help]
+#   DIR         a folder (or a file) inside a git checkout; default: the current directory
+#   -u, --url   print the PR URL only; do not open the browser
+#
+# Output on success: "#N  title  (STATE)  URL" (or just the URL with -u), then the browser opens.
+#
+# Exit codes: 0 PR found; 1 the branch has no PR; 2 usage error (no git repo, detached HEAD,
+#             gh missing, or gh cannot reach the repo with any logged-in account).
+#
+# Multiple GitHub accounts: if gh cannot see the repo with the active account, the script
+# tries each other logged-in account for the host (gh auth switch) and keeps the one that works.
+set -uo pipefail
+
+usage() {
+  awk 'NR == 1 { next } !/^#/ { exit } { sub(/^# ?/, ""); print }' "$0"
+}
+
+dir="."
+print_only=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -u|--url) print_only=1 ;;
+    -h|--help) usage; exit 0 ;;
+    --) shift; [[ $# -gt 0 ]] && dir="$1" ;;
+    -*) echo "open-pr: unknown option: $1" >&2; usage >&2; exit 2 ;;
+    *) dir="$1" ;;
+  esac
+  shift
+done
+
+command -v gh >/dev/null 2>&1 || { echo "open-pr: gh CLI not found (brew install gh)" >&2; exit 2; }
+command -v git >/dev/null 2>&1 || { echo "open-pr: git not found" >&2; exit 2; }
+
+[[ -f "$dir" ]] && dir=$(dirname "$dir")
+[[ -d "$dir" ]] || { echo "open-pr: not a directory: $dir" >&2; exit 2; }
+cd "$dir" || exit 2
+
+toplevel=$(git rev-parse --show-toplevel 2>/dev/null) \
+  || { echo "open-pr: not inside a git repository: $(pwd -P)" >&2; exit 2; }
+branch=$(git branch --show-current)
+[[ -n $branch ]] || { echo "open-pr: detached HEAD in $toplevel; check out a branch first" >&2; exit 2; }
+
+errfile=$(mktemp -t open-pr)
+trap 'rm -f "$errfile"' EXIT
+
+# Look up the PR that belongs to the checked-out branch.
+# Prints one tab-separated line: number, state, isDraft, url, title. Errors go to $errfile.
+query_pr() {
+  gh pr view --json number,title,state,url,isDraft \
+    --template '{{.number}}{{"\t"}}{{.state}}{{"\t"}}{{.isDraft}}{{"\t"}}{{.url}}{{"\t"}}{{.title}}' \
+    2>"$errfile"
+}
+
+no_pr() { grep -q "no pull requests found" "$errfile"; }
+
+# The host gh uses for this repo. The git remote may use an SSH alias (e.g. github.com-foo),
+# so take the host from gh itself and fall back to github.com.
+repo_host() {
+  gh repo view --json url --jq .url 2>/dev/null | sed -E 's#^https?://([^/]+)/.*#\1#'
+}
+
+active_login() {
+  gh auth status --hostname "$1" --json hosts \
+    --jq ".hosts[\"$1\"][] | select(.active == true) | .login" 2>/dev/null
+}
+
+other_logins() {
+  gh auth status --hostname "$1" --json hosts \
+    --jq ".hosts[\"$1\"][] | select(.active == false and .state == \"success\") | .login" 2>/dev/null
+}
+
+# Try the other logged-in accounts for the host. On success prints "login<TAB>result-line" and
+# leaves that account active. On failure restores the original account and returns 1.
+try_other_accounts() {
+  local host="$1" active="$2" login line
+  for login in $(other_logins "$host"); do
+    gh auth switch --hostname "$host" --user "$login" >/dev/null 2>&1 || continue
+    line=$(query_pr)
+    # A result, or "no pull requests found", both mean this account can see the repo.
+    if [[ -n $line ]] || no_pr; then
+      printf '%s\t%s' "$login" "$line"
+      return 0
+    fi
+  done
+  [[ -n $active ]] && gh auth switch --hostname "$host" --user "$active" >/dev/null 2>&1
+  return 1
+}
+
+line=$(query_pr)
+if [[ -z $line ]] && ! no_pr; then
+  host=$(repo_host)
+  [[ -n $host ]] || host="github.com"
+  if result=$(try_other_accounts "$host" "$(active_login "$host")"); then
+    switched=${result%%$'\t'*}
+    line=${result#*$'\t'}
+    echo "open-pr: switched gh account to '$switched' for $host" >&2
+  else
+    echo "open-pr: gh cannot read the PR for '$branch' in $toplevel with any logged-in account:" >&2
+    sed 's/^/        /' "$errfile" >&2
+    echo "        check: gh auth status; then: gh auth switch --user NAME" >&2
+    exit 2
+  fi
+fi
+
+if [[ -z $line ]]; then
+  echo "open-pr: no pull request for branch '$branch' in $toplevel" >&2
+  if ! git rev-parse --verify --quiet '@{upstream}' >/dev/null 2>&1; then
+    echo "        the branch has no upstream; push it first: git push -u origin $branch" >&2
+  fi
+  echo "        create one with: gh pr create --web" >&2
+  mine=$(gh pr list --author @me --state open --json number,headRefName,url \
+    --template '{{range .}}        #{{.number}}  {{.headRefName}}  {{.url}}{{"\n"}}{{end}}' 2>/dev/null)
+  if [[ -n $mine ]]; then
+    echo "        your open PRs in this repo:" >&2
+    printf '%s' "$mine" >&2
+  fi
+  exit 1
+fi
+
+IFS=$'\t' read -r number state is_draft url title <<<"$line"
+[[ $is_draft == true ]] && state="DRAFT"
+
+if (( print_only )); then
+  echo "$url"
+  exit 0
+fi
+
+echo "#$number  $title  ($state)  $url"
+gh pr view "$number" --web
