@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#
+# install-noon-dev — install the latest Noon Dev DMG (no tests).
+#
+# Wraps the build-watcher CLI's `install` subcommand: resolve the newest Dev release,
+# download → mount → uninstall old → ditto → verify → `xattr -cr` (strip quarantine so
+# the ad-hoc-signed dev build launches without "app is damaged") → detach.
+#
+# Usage:
+#   install-noon-dev                 # newest Dev DMG
+#   install-noon-dev --url <dmg-url> # a specific build
+#   install-noon-dev --fresh         # `just cleanup` first (app-support session preserved)
+#
+# Overrides:
+#   LOOM_REPO=/path/to/loom/checkout install-noon-dev
+#     Point at a loom checkout that has the build-watcher `install` command. Defaults to
+#     the checkout where it currently lives; update this once the change is merged to main
+#     and you're running from an up-to-date checkout.
+set -euo pipefail
+
+REPO="${LOOM_REPO:-/Users/anshu/code/weaver/wd/loom.worktrees/dnd-install-dev-dmg}"
+CLI="apps/wd-web/e2eElectron/build-watcher/build-watcher.mjs"
+
+if [[ ! -f "$REPO/$CLI" ]]; then
+  echo "✗ build-watcher CLI not found at: $REPO/$CLI" >&2
+  echo "  Set LOOM_REPO to a loom checkout that has the 'install' subcommand, e.g.:" >&2
+  echo "    LOOM_REPO=/Users/anshu/code/weaver/wd/loom.worktrees/<checkout> install-noon-dev" >&2
+  exit 1
+fi
+
+# GH token for the release lookup + private DMG download: prefer an already-set GH_TOKEN,
+# else GH_TOKEN_RW, else derive it from `gh auth token`.
+if [[ -z "${GH_TOKEN:-}" ]]; then
+  if [[ -n "${GH_TOKEN_RW:-}" ]]; then
+    export GH_TOKEN="$GH_TOKEN_RW"
+  elif command -v gh >/dev/null 2>&1; then
+    export GH_TOKEN="$(gh auth token)"
+  else
+    echo "✗ No GH token: set GH_TOKEN / GH_TOKEN_RW, or authenticate with 'gh auth login'." >&2
+    exit 1
+  fi
+fi
+
+cd "$REPO"
+exec node "$CLI" install "$@"
