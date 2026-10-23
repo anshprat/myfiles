@@ -6,7 +6,8 @@ TERRAFORM105=$HOME/bin/gitignore.d/terraform105
 TERRAFORM1114=$HOME/bin/gitignore.d/terraform1.11.4
 TERRAFORM1133=$HOME/bin/gitignore.d/terraform1.13.3
 TERRAFORM1134=$HOME/bin/gitignore.d/terraform1.13.4
-TERRAFORM=$TERRAFORM1114
+TERRAFORM1_15_6=/opt/homebrew/bin/terraform
+TERRAFORM=$TERRAFORM1_15_6
 # TERRAFORM=$(which terraform || echo $TERRAFORM)
 
 # find ~/.aws/credentials -mmin +45 -exec ~/bin/save_aws_creds \;
