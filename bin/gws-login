@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# gws-login: wrapper for `gws auth login` that auto-opens the printed auth URL.
+# gws only prints the OAuth URL and blocks waiting for the localhost callback,
+# so we run it under a PTY (script) to keep the scope picker interactive,
+# record its output, and open the URL in the browser as soon as it appears.
+set -uo pipefail
+
+typescript=$(mktemp -t gws-login)
+
+# Watch the recorded output for the OAuth URL and open the first one found.
+(
+  while :; do
+    url=$(grep -aoE 'https://accounts\.google\.com[^[:space:][:cntrl:]]+' "$typescript" 2>/dev/null | head -1)
+    if [[ -n $url ]]; then
+      open "$url"
+      exit 0
+    fi
+    kill -0 $$ 2>/dev/null || exit 0
+    sleep 0.2
+  done
+) &
+watcher=$!
+
+cleanup() {
+  kill "$watcher" 2>/dev/null
+  rm -f "$typescript"
+}
+trap cleanup EXIT
+
+if [[ -t 0 && -t 1 ]]; then
+  # PTY keeps gws's interactive prompts (scope picker) working.
+  # -t 0: flush the typescript on every write (default is every 30s,
+  # which would delay the watcher seeing the URL).
+  script -q -t 0 "$typescript" gws auth login "$@"
+else
+  gws auth login "$@" 2>&1 | tee "$typescript"
+fi

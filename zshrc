@@ -19,7 +19,7 @@ export G="git@github.com:"
 # precmd() { set_screen_title; }
 #Gcloud bin to path for kubectl etc
 export PATH="/opt/homebrew/share/google-cloud-sdk/bin:$PATH"
-export SSH_AUTH_SOCK=/Users/anshuprateek/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh
+export SSH_AUTH_SOCK="$HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
 
 
 export PATH=$PATH:$HOME/bin:$HOME/.local/bin:$GOPATH/bin:$CODE_PATH/$COMPANY/dev-shell/src/bin
@@ -37,7 +37,7 @@ alias dc="docker-compose"
 alias bt="byobu-tmux"
 alias kustomize="kustomize"
 
-source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme
+# source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme
 
 export AWS_PAGER="" 
 
@@ -47,7 +47,7 @@ export GH_PAGER=""
 
 alias gclogin="gcloud auth login"
 
-export CLAUDE_CODE_CONFIG=/Users/anshuprateek/code/anshprat/claude-billing/claude-code-config.json
+export CLAUDE_CODE_CONFIG="$HOME/code/anshprat/claude-billing/claude-code-config.json"
 
 alias kustomiz="kustomize"
 
@@ -65,7 +65,7 @@ for git_overload in gco gr gcl; do
 done
 
 # The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/anshuprateek/.docker/completions $fpath)
+fpath=($HOME/.docker/completions $fpath)
 autoload -Uz compinit
 compinit
 # End of Docker CLI completions
@@ -74,11 +74,11 @@ compinit
 # [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # Added by Antigravity
-# export PATH="/Users/anshuprateek/.antigravity/antigravity/bin:$PATH"
+# export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 
 # Brew upgrade logging - logs all upgrades to ~/tmp/var/log/brew-upgrades.log
-source "$HOME/tmp/var/log/brew-upgrade-logger.sh"
-alias brew-upgrade='brew_upgrade_logged'
+# source "$HOME/tmp/var/log/brew-upgrade-logger.sh"
+# alias brew-upgrade='brew_upgrade_logged'
 
 # AI Center - Multi-Agent Communication System
 export PATH="${HOME}/.ai-center/bin:${PATH}"

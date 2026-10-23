@@ -89,17 +89,35 @@ ss_basedir="$HOME/tmp/$base_screenshots"
 basedir="$ss_basedir/all/$folderpath"
 
 desktop_symfolder="$HOME/Desktop/$base_screenshots"
+today=`date +%F`
+daily_screenshots="dailyscreenshots"
+daily_screenshots_target="all/$folderpath/$today"
+daily_screenshots_link="$ss_basedir/$daily_screenshots"
 
 if [ ! -L $desktop_symfolder ]
 then
   ln -s $ss_basedir $desktop_symfolder
 fi
 
+basedir="$ss_basedir/$daily_screenshots_target"
+cnm
+
+if [ ! -L "$daily_screenshots_link" ] || [ "$(readlink "$daily_screenshots_link")" != "$daily_screenshots_target" ]; then
+  if [ -L "$daily_screenshots_link" ]; then
+    rm "$daily_screenshots_link"
+    is_deleted=$?
+
+    if [ $is_deleted -ne 0 ]; then
+      osascript -e 'display notification "Failed to delete dailyscreenshots, check full disk access for cron and downloads_organizer" with title "Full disk access for cron"'
+      exit 1
+    fi
+  fi
+
+  ln -s "$daily_screenshots_target" "$daily_screenshots_link"
+fi
+
 if [[ `ls|grep Screen|wc -l ` -gt 0 ]]
 then
-  today=`date +%F`
-  basedir=$basedir/$today
-  cnm
   mv -v Screen* $basedir
 fi
 

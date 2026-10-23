@@ -1,0 +1,2 @@
+clauded \
+--resume  $(basename `pwd`)
