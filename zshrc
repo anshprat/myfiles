@@ -73,6 +73,15 @@ compinit
 # # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 # [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# Prefix the prompt with the short hostname (text before the first '.').
+# oh-my-zsh sources the theme after custom/*.zsh, so a plain PS1 assignment
+# here is overwritten. A precmd hook applies the prefix after the theme loads.
+_ps1_host_prefix() {
+  [[ $PS1 == *'%m'* ]] || PS1="%F{yellow}%m%f $PS1"
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _ps1_host_prefix
+
 # Added by Antigravity
 # export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 
