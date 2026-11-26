@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+# firefox-remote-control on|off|status
+#
+# Turns Firefox's "remote control" (Marionette on port 2828, plus WebDriver BiDi) on or off in the
+# RUNNING browser, so a Marionette client such as the Firefox MCP (--connect-existing
+# --marionette-port 2828) can attach without restarting Firefox.
+#
+# How: Firefox 160+ ships RemoteControlServers, gated by the experimental pref
+# remote.experimental.dynamicstart.enabled. Only privileged browser JS can call it, so this script
+# opens the Browser Console (Cmd+Shift+J) through macOS UI scripting, types one line that sets the
+# pref and starts or stops the servers, and closes the console again. It types nothing unless the
+# front window of the target Firefox is the Browser Console.
+#
+# Several Firefox instances (one per profile) can run at once. The script acts on the instance
+# whose profile folder name ends with $FIREFOX_PROFILE (default: default-release), and focuses
+# that exact process, so keystrokes never go to another instance.
+#
+# One-time setup:
+#   1. about:config: set devtools.chrome.enabled to true (lets the Browser Console run commands).
+#   2. System Settings > Privacy & Security > Accessibility: allow the terminal app you run this from.
+#      For an ad-hoc signed app (such as HexoKit), remove and re-add it after each update.
+#
+# Firefox asks you to Allow each new connection. Restarting Firefox turns remote control off.
+set -euo pipefail
+
+PORT="${FIREFOX_MARIONETTE_PORT:-2828}"
+PROFILE="${FIREFOX_PROFILE:-default-release}"
+MODULE="moz-src:///browser/components/remotecontrol/RemoteControlServers.sys.mjs"
+SERVERS="ChromeUtils.importESModule(\"$MODULE\").RemoteControlServers"
+
+usage() {
+  echo "usage: $(basename "$0") on|off|status   (env: FIREFOX_PROFILE, FIREFOX_MARIONETTE_PORT)" >&2
+  exit 2
+}
+
+is_listening() {
+  lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1
+}
+
+listener_pid() {
+  lsof -nP -t -iTCP:"$PORT" -sTCP:LISTEN 2>/dev/null | head -1
+}
+
+# The running profile's folder, from the lock file Firefox holds open.
+profile_dir() {
+  lsof -p "$1" -Fn 2>/dev/null | sed -n 's#^n\(.*/Firefox/Profiles/.*\)/\.parentlock$#\1#p' | head -1
+}
+
+# PID of the Firefox instance that runs $PROFILE.
+target_pid() {
+  local pid dir
+  for pid in $(pgrep -f "Firefox.app/Contents/MacOS/firefox " || true); do
+    dir=$(profile_dir "$pid")
+    case "$(basename "$dir")" in
+      "$PROFILE" | *."$PROFILE") echo "$pid"; return 0 ;;
+    esac
+  done
+  return 1
+}
+
+running_profiles() {
+  local pid
+  for pid in $(pgrep -f "Firefox.app/Contents/MacOS/firefox " || true); do
+    echo "  pid $pid: $(basename "$(profile_dir "$pid")")"
+  done
+}
+
+describe_listener() {
+  local lp
+  lp=$(listener_pid)
+  [ -n "$lp" ] || return 0
+  echo "pid $lp, profile $(basename "$(profile_dir "$lp")")"
+}
+
+# Sets PID to the target instance and checks the one-time pref.
+require_chrome_console() {
+  local dir
+  if ! PID=$(target_pid); then
+    echo "No running Firefox uses profile '$PROFILE'. Running instances:" >&2
+    running_profiles >&2
+    echo "Set FIREFOX_PROFILE to one of the names above, or start that profile." >&2
+    exit 1
+  fi
+  dir=$(profile_dir "$PID")
+  if [ -n "$dir" ] && ! grep -q 'user_pref("devtools.chrome.enabled", true);' "$dir/prefs.js" 2>/dev/null; then
+    echo "One-time setup needed: in about:config of profile '$PROFILE', set devtools.chrome.enabled to true, then run this again." >&2
+    exit 1
+  fi
+}
+
+# Types one line of JS into the Browser Console of Firefox process $2 and presses Return.
+run_in_browser_console() {
+  osascript - "$1" "$2" <<'APPLESCRIPT'
+on run argv
+  set js to item 1 of argv
+  set targetPid to (item 2 of argv) as integer
+  tell application "System Events"
+    set ff to first process whose unix id is targetPid
+    set frontmost of ff to true
+    repeat 20 times
+      if frontmost of ff then exit repeat
+      delay 0.1
+    end repeat
+    if not (frontmost of ff) then error "Could not bring Firefox (pid " & targetPid & ") to the front; nothing was typed."
+    keystroke "j" using {command down, shift down}
+    set consoleOpen to false
+    repeat 40 times
+      delay 0.2
+      try
+        if name of front window of ff contains "Browser Console" then
+          set consoleOpen to true
+          exit repeat
+        end if
+      end try
+    end repeat
+    if not consoleOpen then
+      set seen to "(no window)"
+      try
+        set seen to name of front window of ff
+      end try
+      error "The Browser Console did not open within 8 s; nothing was typed. Front window of pid " & targetPid & ": " & seen
+    end if
+    keystroke js
+    delay 0.3
+    key code 36
+    delay 1
+    if name of front window of ff contains "Browser Console" then
+      keystroke "w" using {command down}
+    end if
+  end tell
+end run
+APPLESCRIPT
+}
+
+wait_for_port() {
+  local want=$1 _
+  for _ in $(seq 1 20); do
+    if [ "$want" = up ] && is_listening; then return 0; fi
+    if [ "$want" = down ] && ! is_listening; then return 0; fi
+    sleep 0.5
+  done
+  return 1
+}
+
+case "${1:-}" in
+  status)
+    if is_listening; then echo "on: Marionette is listening on $PORT ($(describe_listener))"; else echo "off: nothing listens on $PORT"; fi
+    ;;
+  on)
+    if is_listening; then echo "Already on: Marionette is listening on $PORT ($(describe_listener))."; exit 0; fi
+    require_chrome_console
+    run_in_browser_console "Services.prefs.setBoolPref(\"remote.experimental.dynamicstart.enabled\", true); $SERVERS.start();" "$PID"
+    if wait_for_port up; then
+      echo "On: Marionette is listening on $PORT ($(describe_listener)). Firefox will ask you to Allow the first connection."
+    else
+      echo "Remote control did not start: nothing listens on $PORT. Check the Browser Console for errors." >&2
+      exit 1
+    fi
+    ;;
+  off)
+    if ! is_listening; then echo "Already off."; exit 0; fi
+    require_chrome_console
+    if [ "$(listener_pid)" != "$PID" ]; then
+      echo "Port $PORT belongs to another Firefox ($(describe_listener)), not profile '$PROFILE'. Set FIREFOX_PROFILE to that profile." >&2
+      exit 1
+    fi
+    run_in_browser_console "$SERVERS.stop();" "$PID"
+    if wait_for_port down; then echo "Off."; else echo "Still listening on $PORT." >&2; exit 1; fi
+    ;;
+  *)
+    usage
+    ;;
+esac
